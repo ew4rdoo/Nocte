@@ -14,6 +14,6 @@ Claude picks the next unchecked task, implements it on a new branch, tests it, a
 - [x] Booking confirmation page — shown after a successful booking. Venue details, date/time, party size, confirmation number. Subtle gold animation on load.
 
 ### Low Priority
-- [ ] Search with autocomplete — search bar on discover page that filters the venue list with debounced input.
+- [x] Search with autocomplete — search bar on discover page that filters the venue list with debounced input.
 - [ ] Onboarding flow — 3 screens: welcome, select your vibe preferences, enable location. Skip option on each. Store preferences in localStorage until Supabase is ready.
 - [ ] Venue card skeleton loader — animated placeholder matching our card design for loading states.
