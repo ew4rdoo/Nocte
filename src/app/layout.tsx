@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import "./globals.css";
+import BottomNav from "./_components/BottomNav";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#050505] text-[#f5f0e8]">
         {children}
+        <BottomNav />
       </body>
     </html>
   );
