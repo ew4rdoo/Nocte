@@ -1,7 +1,7 @@
 export type Venue = {
   id: string;
   name: string;
-  category: "club" | "lounge" | "rooftop" | "dining" | "beach" | "bar";
+  category?: "club" | "lounge" | "rooftop" | "dining" | "beach" | "bar";
   type: string;
   neighborhood: string;
   address: string;
@@ -13,7 +13,7 @@ export type Venue = {
   dressCode?: string;
   minimums?: string;
   bottleServiceRange?: string;
-  bestFor: string[];
+  bestFor?: string[];
   notes?: string;
   bottleMin: number;
   tableCapacity: string;
@@ -33,7 +33,7 @@ export const VENUES: Venue[] = [
     address: "4441 Collins Ave, Miami Beach, FL 33140",
     description:
       "Miami's flagship nightclub inside the Fontainebleau. World-class DJ residencies, massive production, and the most recognizable room in the city.",
-    vibe: ["high-energy", "celebrity", "production"],
+    vibe: ["Wild", "Electric", "Celebrity"],
     priceRange: "$$$$",
     hours: "Fri–Sat 11pm–5am",
     dressCode: "Strict — upscale attire required, no athletic wear",
@@ -73,7 +73,7 @@ export const VENUES: Venue[] = [
     address: "29 NE 11th St, Miami, FL 33132",
     description:
       "The only 24-hour ultra lounge in Miami. Theatrical performances, multiple floors, and an energy that peaks at sunrise. Truly one of a kind.",
-    vibe: ["theatrical", "non-stop", "eclectic"],
+    vibe: ["24-Hour", "Electric", "Wild"],
     priceRange: "$$$$",
     hours: "24 hours, peaks Fri–Sat midnight–6am",
     dressCode: "Upscale — fashion-forward encouraged",
@@ -131,7 +131,7 @@ export const VENUES: Venue[] = [
     address: "801 Brickell Ave, Miami, FL 33131",
     description:
       "Three floors of Japanese-Latin fusion in the heart of Brickell. The biggest scene in the city on weekend nights — equal parts restaurant and nightlife destination.",
-    vibe: ["see-and-be-seen", "upscale", "social"],
+    vibe: ["Upscale", "Social", "Trendy"],
     priceRange: "$$$",
     hours: "Mon–Sun 5pm–2am",
     dressCode: "Smart casual to upscale",
@@ -187,7 +187,7 @@ export const VENUES: Venue[] = [
     address: "90 NE 39th St, Miami, FL 33137",
     description:
       "Pharrell Williams' Design District restaurant. Beautiful crowd, eclectic menu, and an energy that bridges dinner and nightlife. Celebrities are a regular sighting.",
-    vibe: ["artsy", "celebrity", "beautiful"],
+    vibe: ["Trendy", "Social", "Fashionable"],
     priceRange: "$$$",
     hours: "Mon–Sun 6pm–1am",
     dressCode: "Fashion-forward, creative encouraged",
@@ -330,7 +330,7 @@ export const VENUES: Venue[] = [
     address: "1921 Collins Ave, Miami Beach, FL 33139",
     description:
       "Intimate South Beach lounge with a celebrity-heavy guest list. More exclusive and controlled than the mega-clubs — knows how to curate a room.",
-    vibe: ["intimate", "celebrity", "exclusive"],
+    vibe: ["Intimate", "Celebrity", "Upscale"],
     priceRange: "$$$",
     hours: "Thu–Sat 11pm–5am",
     dressCode: "Upscale — strictly enforced",
@@ -385,7 +385,7 @@ export const VENUES: Venue[] = [
     address: "661 Brickell Key Dr, Miami, FL 33131",
     description:
       "Miami's most intimate omakase experience — 8 seats, Chef Kevin Cory, and a meal that requires weeks of patience to book. Truly exceptional.",
-    vibe: ["intimate", "chef-driven", "special"],
+    vibe: ["Quiet", "Refined", "Intimate"],
     priceRange: "$$$$",
     hours: "Wed–Sat, seatings at 6pm and 8:30pm",
     dressCode: "Business casual to upscale",
@@ -496,7 +496,7 @@ export function formatVenuesForPrompt(): string {
       `Hours: ${v.hours}`,
       `Description: ${v.description}`,
       `Vibe: ${v.vibe.join(", ")}`,
-      `Best for: ${v.bestFor.join(", ")}`,
+      `Best for: ${(v.bestFor || []).join(", ")}`,
     ];
     if (v.dressCode) lines.push(`Dress code: ${v.dressCode}`);
     if (v.minimums) lines.push(`Minimums: ${v.minimums}`);

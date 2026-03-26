@@ -1,19 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VENUES } from "@/lib/venues";
+import VenueCardSkeleton from "@/app/_components/VenueCardSkeleton";
 
 const TYPE_FILTERS = ["All", "Nightclub", "Lounge", "Restaurant & Bar", "Ultra Lounge", "Omakase", "Steakhouse", "Bar"];
 const VIBE_FILTERS = ["All", "Wild", "Electric", "Upscale", "Intimate", "Chill", "Trendy", "Celebrity", "24-Hour"];
 const PRICE_FILTERS = ["All", "$", "$$", "$$$", "$$$$"];
 const NEIGHBORHOOD_FILTERS = ["All", "South Beach", "Brickell", "Wynwood", "Design District", "Downtown"];
 
+const SKELETON_COUNT = 6;
+
 export default function DiscoverPage() {
+  const [loading, setLoading] = useState(true);
   const [activeType, setActiveType] = useState("All");
   const [activeVibe, setActiveVibe] = useState("All");
   const [activePrice, setActivePrice] = useState("All");
   const [activeNeighborhood, setActiveNeighborhood] = useState("All");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
 
   const filtered = VENUES.filter((v) => {
     if (activeType !== "All" && v.type !== activeType) return false;
@@ -80,27 +93,35 @@ export default function DiscoverPage() {
       </div>
 
       {/* Results count */}
-      <div className="px-6 mb-4 flex items-center justify-between">
-        <p className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase">
-          {filtered.length} venue{filtered.length !== 1 ? "s" : ""}
-        </p>
-        {(activeType !== "All" || activeVibe !== "All" || activePrice !== "All" || activeNeighborhood !== "All") && (
-          <button
-            onClick={() => {
-              setActiveType("All");
-              setActiveVibe("All");
-              setActivePrice("All");
-              setActiveNeighborhood("All");
-            }}
-            className="font-sans text-[10px] tracking-[0.2em] uppercase text-nocte-gold"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
+      {!loading && (
+        <div className="px-6 mb-4 flex items-center justify-between">
+          <p className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase">
+            {filtered.length} venue{filtered.length !== 1 ? "s" : ""}
+          </p>
+          {(activeType !== "All" || activeVibe !== "All" || activePrice !== "All" || activeNeighborhood !== "All") && (
+            <button
+              onClick={() => {
+                setActiveType("All");
+                setActiveVibe("All");
+                setActivePrice("All");
+                setActiveNeighborhood("All");
+              }}
+              className="font-sans text-[10px] tracking-[0.2em] uppercase text-nocte-gold"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
 
-      {/* Venue grid */}
-      {filtered.length === 0 ? (
+      {/* Venue grid — skeleton or real cards */}
+      {loading ? (
+        <div className="grid grid-cols-2 gap-px mx-6">
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <VenueCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
           <p className="font-display text-2xl font-light text-nocte-cream italic mb-3">
             No venues match.
