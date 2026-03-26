@@ -11,9 +11,9 @@ Claude picks the next unchecked task, implements it on a new branch, tests it, a
 ### Medium Priority
 - [x] Lifestyle page buildout — replace the stub with real service cards for yacht, jet, car, and hotel. Each card has a gradient background, icon, description, and "Inquire" CTA that opens the concierge with a prefilled message.
 - [x] Nights feed page — replace the stub with a scrollable feed of mock nightlife moments. Each post has a photo placeholder, venue name, caption, timestamp, and like count.
-- [ ] Booking confirmation page — shown after a successful booking. Venue details, date/time, party size, confirmation number. Subtle gold animation on load.
+- [x] Booking confirmation page — shown after a successful booking. Venue details, date/time, party size, confirmation number. Subtle gold animation on load.
 
 ### Low Priority
-- [ ] Search with autocomplete — search bar on discover page that filters the venue list with debounced input.
-- [ ] Onboarding flow — 3 screens: welcome, select your vibe preferences, enable location. Skip option on each. Store preferences in localStorage until Supabase is ready.
+- [x] Search with autocomplete — search bar on discover page that filters the venue list with debounced input.
+- [x] Onboarding flow — 3 screens: welcome, select your vibe preferences, enable location. Skip option on each. Store preferences in localStorage until Supabase is ready.
 - [ ] Venue card skeleton loader — animated placeholder matching our card design for loading states.
