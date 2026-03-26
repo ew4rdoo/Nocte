@@ -6,7 +6,7 @@ import BottomNav from "./_components/BottomNav";
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const outfit = Outfit({
@@ -15,8 +15,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Noctē",
-  description: "Luxury nightlife concierge",
+  title: "Noctē — Your Luxury Nightlife Concierge",
+  description:
+    "AI-powered nightlife and lifestyle concierge for Miami's most exclusive venues.",
 };
 
 export default function RootLayout({
@@ -29,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-nocte-black">
+      <body className="min-h-full flex flex-col bg-nocte-black text-[#f5f0e8]">
         {children}
         <BottomNav />
       </body>

@@ -27,6 +27,7 @@ export default function DiscoverPage() {
     return () => clearTimeout(timer);
   }, []);
 
+
   const filtered = VENUES.filter((v) => {
     if (activeType !== "All" && v.type !== activeType) return false;
     if (activeVibe !== "All" && !v.vibe.includes(activeVibe)) return false;
