@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gold: #c9a84c;
+  --color-gold-light: #e4c97e;
+  --color-gold-dark: #a07a2a;
   --color-nocte-black: #050505;
   --color-nocte-gold: #c9a84c;
   --color-nocte-gold-light: #dbb96a;
@@ -14,9 +19,15 @@
   --font-sans: var(--font-outfit);
 }
 
+:root {
+  --background: #050505;
+  --foreground: #f5f0e8;
+}
+
 body {
-  background: #050505;
-  color: #f0ebe0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), system-ui, sans-serif;
 }
 
 @keyframes gold-glow-in {
