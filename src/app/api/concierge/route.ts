@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { formatVenuesForPrompt } from "@/lib/venues";
 
-const client = new Anthropic();
-
 function buildSystemPrompt(): string {
   return `You are Noctē — the personal concierge for Miami's most discerning nightlife experiences. You are not a chatbot. You are a trusted, well-connected friend who knows every room, every host, and every table in the city.
 
@@ -53,6 +51,7 @@ export async function POST(request: Request) {
       return new Response("Invalid messages", { status: 400 });
     }
 
+    const client = new Anthropic();
     const stream = client.messages.stream({
       model: "claude-opus-4-6",
       max_tokens: 1024,
