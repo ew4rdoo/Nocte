@@ -1,3 +1,13 @@
+export type TableOption = {
+  id: string;
+  name: string;
+  description: string;
+  location: string;
+  capacity: { min: number; max: number };
+  minimumSpend: number;
+  available: boolean;
+};
+
 export type Venue = {
   id: string;
   name: string;
@@ -20,6 +30,7 @@ export type Venue = {
   phone: string;
   reviews: { author: string; text: string; rating: number }[];
   hot?: boolean;
+  tables?: TableOption[];
 };
 
 export const VENUES: Venue[] = [
@@ -62,6 +73,12 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: true,
+    tables: [
+      { id: "liv-vip-main", name: "VIP Table", description: "Main floor VIP with direct DJ view", location: "Main Floor", capacity: { min: 4, max: 8 }, minimumSpend: 2500, available: true },
+      { id: "liv-vip-mezzanine", name: "Mezzanine VIP", description: "Elevated mezzanine overlooking the dance floor", location: "Mezzanine", capacity: { min: 4, max: 10 }, minimumSpend: 3500, available: true },
+      { id: "liv-dance-floor", name: "Dance Floor Table", description: "Front row — you're part of the show", location: "Dance Floor", capacity: { min: 6, max: 10 }, minimumSpend: 5000, available: true },
+      { id: "liv-owners", name: "Owner's Table", description: "The best table in the house. Private area, dedicated staff", location: "Private Section", capacity: { min: 8, max: 15 }, minimumSpend: 10000, available: true },
+    ],
   },
   {
     id: "e11even",
@@ -97,6 +114,11 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: true,
+    tables: [
+      { id: "e11-main-vip", name: "Main Room VIP", description: "Ground level with stage views and full bottle service", location: "Main Room", capacity: { min: 4, max: 8 }, minimumSpend: 1500, available: true },
+      { id: "e11-skybox", name: "Skybox", description: "Second-floor private booth overlooking the stage", location: "Upper Level", capacity: { min: 4, max: 6 }, minimumSpend: 2500, available: true },
+      { id: "e11-rooftop", name: "Rooftop Table", description: "Open-air rooftop with city skyline views", location: "Rooftop", capacity: { min: 4, max: 10 }, minimumSpend: 3000, available: true },
+    ],
   },
   {
     id: "club-space",
@@ -120,6 +142,10 @@ export const VENUES: Venue[] = [
     tableCapacity: "4–8 guests",
     phone: "",
     reviews: [],
+    tables: [
+      { id: "cs-terrace", name: "Terrace Table", description: "The legendary terrace — sunrise sessions happen here", location: "Terrace", capacity: { min: 4, max: 8 }, minimumSpend: 1000, available: true },
+      { id: "cs-main", name: "Main Room Table", description: "Inside the main room near the booth", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1500, available: true },
+    ],
   },
   {
     id: "komodo",
@@ -154,6 +180,11 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: false,
+    tables: [
+      { id: "komodo-dining", name: "Dining Table", description: "Main dining room with views of the open kitchen", location: "Dining Room", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
+      { id: "komodo-rooftop", name: "Rooftop Table", description: "Third-floor open-air rooftop — the scene on weekends", location: "Rooftop", capacity: { min: 4, max: 8 }, minimumSpend: 800, available: true },
+      { id: "komodo-vip", name: "VIP Section", description: "Semi-private area with dedicated server", location: "Second Floor", capacity: { min: 6, max: 12 }, minimumSpend: 1500, available: true },
+    ],
   },
   {
     id: "gekko",
@@ -209,6 +240,11 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: true,
+    tables: [
+      { id: "swan-indoor", name: "Indoor Table", description: "Main dining room surrounded by Pharrell's art curation", location: "Dining Room", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
+      { id: "swan-patio", name: "Patio Table", description: "Outdoor patio in the Design District courtyard", location: "Patio", capacity: { min: 2, max: 8 }, minimumSpend: 500, available: true },
+      { id: "swan-bar", name: "Bar Area", description: "Walk-in bar area — turns into a party after 11pm", location: "Bar", capacity: { min: 2, max: 4 }, minimumSpend: 0, available: true },
+    ],
   },
   {
     id: "sugar",
@@ -353,6 +389,10 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: false,
+    tables: [
+      { id: "mynt-vip", name: "VIP Booth", description: "Intimate booth in the main room", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1200, available: true },
+      { id: "mynt-premium", name: "Premium Table", description: "Best sightlines in the house — center of the action", location: "Center Floor", capacity: { min: 4, max: 8 }, minimumSpend: 2000, available: true },
+    ],
   },
   {
     id: "zuma",
@@ -408,6 +448,10 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: false,
+    tables: [
+      { id: "naoe-counter", name: "Omakase Counter", description: "8-seat counter — the full experience", location: "Counter", capacity: { min: 1, max: 2 }, minimumSpend: 0, available: true },
+      { id: "naoe-private", name: "Private Room", description: "Intimate private dining for special occasions", location: "Private Room", capacity: { min: 4, max: 8 }, minimumSpend: 0, available: true },
+    ],
   },
   {
     id: "papi-steak",
@@ -439,6 +483,11 @@ export const VENUES: Venue[] = [
       },
     ],
     hot: true,
+    tables: [
+      { id: "papi-dining", name: "Dining Table", description: "Main room table — theatrical wagyu presentations", location: "Main Dining", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
+      { id: "papi-vip", name: "VIP Booth", description: "Private booth with dedicated sommelier service", location: "VIP Section", capacity: { min: 4, max: 10 }, minimumSpend: 1000, available: true },
+      { id: "papi-chefs", name: "Chef's Table", description: "Front-row seat to the kitchen — limited availability", location: "Kitchen View", capacity: { min: 2, max: 4 }, minimumSpend: 1500, available: true },
+    ],
   },
   {
     id: "floyd",
@@ -485,6 +534,11 @@ export function getVenuesByNeighborhood(neighborhood: string): Venue[] {
 
 export function getVenuesByCategory(category: Venue["category"]): Venue[] {
   return VENUES.filter((v) => v.category === category);
+}
+
+export function getTablesForVenue(venueId: string): TableOption[] {
+  const venue = getVenueById(venueId);
+  return venue?.tables ?? [];
 }
 
 export function formatVenuesForPrompt(): string {

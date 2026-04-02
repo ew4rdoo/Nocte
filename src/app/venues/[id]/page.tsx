@@ -16,7 +16,9 @@ export default async function VenueDetailPage({
 
   if (!venue) notFound();
 
-  const conciergeHref = `/concierge?msg=I'm interested in booking a table at ${encodeURIComponent(venue.name)}`;
+  const hasTables = venue.tables && venue.tables.length > 0;
+  const bookHref = `/venues/${venue.id}/book`;
+  const conciergeHref = `/concierge?message=${encodeURIComponent(`I'm interested in ${venue.name}`)}`;
 
   return (
     <div
@@ -82,22 +84,40 @@ export default async function VenueDetailPage({
         </div>
       </div>
 
-      {/* Book CTA — sticky at transition */}
-      <div className="px-6 py-6 border-b border-nocte-border">
-        <Link
-          href={conciergeHref}
-          className="flex items-center justify-center gap-3 border border-nocte-gold text-nocte-gold font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold hover:text-nocte-black transition-all duration-300 w-full"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Book with Concierge
-        </Link>
+      {/* Book CTA */}
+      <div className="px-6 py-6 border-b border-nocte-border flex flex-col gap-3">
+        {hasTables ? (
+          <Link
+            href={bookHref}
+            className="flex items-center justify-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold-light transition-all duration-300 w-full"
+          >
+            Reserve a Table
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        ) : (
+          <Link
+            href={conciergeHref}
+            className="flex items-center justify-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold-light transition-all duration-300 w-full"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+            Inquire with Concierge
+          </Link>
+        )}
+        {hasTables && (
+          <Link
+            href={conciergeHref}
+            className="flex items-center justify-center gap-2 border border-nocte-border text-nocte-muted font-sans text-[10px] tracking-[0.2em] uppercase px-6 py-3 hover:border-nocte-gold/40 hover:text-nocte-cream transition-all duration-300 w-full"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+            Ask the Concierge
+          </Link>
+        )}
       </div>
 
       {/* Description */}
@@ -252,23 +272,29 @@ export default async function VenueDetailPage({
 
       {/* Bottom CTA */}
       <div className="px-6 py-8">
-        <Link
-          href={conciergeHref}
-          className="flex items-center justify-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold-light transition-all duration-300 w-full"
-        >
-          Book with Concierge
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 12h14M13 6l6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
+        {hasTables ? (
+          <Link
+            href={bookHref}
+            className="flex items-center justify-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold-light transition-all duration-300 w-full"
+          >
+            Reserve a Table
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        ) : (
+          <Link
+            href={conciergeHref}
+            className="flex items-center justify-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-6 py-4 hover:bg-nocte-gold-light transition-all duration-300 w-full"
+          >
+            Inquire with Concierge
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        )}
         <p className="font-sans text-[9px] text-nocte-muted text-center mt-3 tracking-[0.15em] uppercase">
-          The concierge handles everything — no calls, no waiting.
+          {hasTables ? "Select your date, table, and you're in." : "The concierge handles everything — no calls, no waiting."}
         </p>
       </div>
     </div>
