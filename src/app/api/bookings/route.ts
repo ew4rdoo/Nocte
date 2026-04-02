@@ -1,5 +1,19 @@
-import { createBooking } from "@/lib/bookings";
+import { createBooking, listBookings } from "@/lib/bookings";
 import { getVenueById } from "@/lib/venues";
+import { sendBookingNotifications } from "@/lib/email";
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const status = url.searchParams.get("status") as "pending" | "confirmed" | "completed" | "cancelled" | null;
+  const date = url.searchParams.get("date");
+
+  const bookings = await listBookings({
+    status: status ?? undefined,
+    date: date ?? undefined,
+  });
+
+  return Response.json({ bookings });
+}
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -26,19 +40,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const booking = createBooking({
-    venueId,
-    venueName: venue.name,
-    tableId,
-    tableName: table.name,
-    date,
-    partySize,
-    guestName,
-    guestPhone,
-    guestEmail,
-    specialRequests,
-    totalMinimum: table.minimumSpend,
-  });
+  try {
+    const booking = await createBooking({
+      venue_id: venueId,
+      venue_name: venue.name,
+      table_id: tableId,
+      table_name: table.name,
+      date,
+      party_size: partySize,
+      guest_name: guestName,
+      guest_phone: guestPhone,
+      guest_email: guestEmail,
+      special_requests: specialRequests,
+      total_minimum: table.minimumSpend,
+    });
 
-  return Response.json({ booking }, { status: 201 });
+    // Send notifications (fire and forget — don't block the response)
+    sendBookingNotifications(booking).catch((err) =>
+      console.error("Email notification error:", err)
+    );
+
+    return Response.json({ booking }, { status: 201 });
+  } catch (err) {
+    console.error("Booking creation error:", err);
+    return Response.json({ error: "Failed to create booking" }, { status: 500 });
+  }
 }

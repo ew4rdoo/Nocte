@@ -18,12 +18,12 @@ type BookingData = {
 
 type BookingResult = {
   id: string;
-  venueName: string;
-  tableName: string;
+  venue_name: string;
+  table_name: string;
   date: string;
-  partySize: number;
-  guestName: string;
-  totalMinimum: number;
+  party_size: number;
+  guest_name: string;
+  total_minimum: number;
 };
 
 export default function BookingFlow({ venue }: { venue: Venue }) {
@@ -492,7 +492,7 @@ function ConfirmStep({
         Booking Confirmed
       </p>
       <p className="font-display text-center text-2xl font-light text-nocte-cream tracking-[0.15em] mb-1">
-        {result.venueName}
+        {result.venue_name}
       </p>
       <p className="font-sans text-center text-xs text-nocte-muted mb-8">
         Confirmation #{result.id}
@@ -502,7 +502,7 @@ function ConfirmStep({
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="font-sans text-xs text-nocte-muted">Guest</span>
-            <span className="font-sans text-xs text-nocte-cream">{result.guestName}</span>
+            <span className="font-sans text-xs text-nocte-cream">{result.guest_name}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-sans text-xs text-nocte-muted">Date</span>
@@ -510,17 +510,17 @@ function ConfirmStep({
           </div>
           <div className="flex justify-between">
             <span className="font-sans text-xs text-nocte-muted">Table</span>
-            <span className="font-sans text-xs text-nocte-cream">{result.tableName}</span>
+            <span className="font-sans text-xs text-nocte-cream">{result.table_name}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-sans text-xs text-nocte-muted">Party</span>
-            <span className="font-sans text-xs text-nocte-cream">{result.partySize} guests</span>
+            <span className="font-sans text-xs text-nocte-cream">{result.party_size} guests</span>
           </div>
-          {result.totalMinimum > 0 && (
+          {result.total_minimum > 0 && (
             <div className="flex justify-between pt-2 border-t border-nocte-border">
               <span className="font-sans text-xs text-nocte-muted">Minimum spend</span>
               <span className="font-display text-sm text-nocte-gold">
-                ${result.totalMinimum.toLocaleString()}
+                ${result.total_minimum.toLocaleString()}
               </span>
             </div>
           )}
