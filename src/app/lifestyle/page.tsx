@@ -2,6 +2,23 @@ import Link from "next/link";
 
 const SERVICES = [
   {
+    id: "dining",
+    name: "Restaurant Reservations",
+    tagline: "Hard-to-Get Tables",
+    description:
+      "Last-minute tables at Carbone, Komodo, Le Jardinier, and every other place that's technically fully booked. We have the relationships.",
+    gradient: "linear-gradient(160deg, #1e1005 0%, #0a0603 55%, #050505 100%)",
+    inquireMessage:
+      "I need a reservation at a top Miami restaurant, ideally tonight or this week. Can you help me get a table?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M18 8h1a4 4 0 010 8h-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6 1v3M10 1v3M14 1v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     id: "yacht",
     name: "Yacht Charters",
     tagline: "Private Day & Sunset Cruises",
@@ -176,46 +193,6 @@ const SERVICES = [
           stroke="currentColor"
           strokeWidth="1.2"
           strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "dining",
-    name: "Restaurant Reservations",
-    tagline: "Hard-to-Get Tables",
-    description:
-      "Last-minute tables at Carbone, Komodo, Le Jardinier, and every other place that's technically fully booked. We have the relationships.",
-    gradient: "linear-gradient(160deg, #1e1005 0%, #0a0603 55%, #050505 100%)",
-    inquireMessage:
-      "I need a reservation at a top Miami restaurant, ideally tonight or this week. Can you help me get a table?",
-    icon: (
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        fill="none"
-        className="text-nocte-gold/70"
-      >
-        <path
-          d="M18 8h1a4 4 0 010 8h-1"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M6 1v3M10 1v3M14 1v3"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
         />
       </svg>
     ),

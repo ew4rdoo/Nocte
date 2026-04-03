@@ -9,14 +9,110 @@ const NEIGHBORHOODS = [
   { name: "Wynwood", tagline: "Art & cocktails", count: VENUES.filter((v) => v.neighborhood === "Wynwood").length },
 ];
 
-const FEED_PREVIEW = [
-  { venue: "E11EVEN", caption: "Saturday was something else.", time: "Last night", likes: 842 },
-  { venue: "LIV", caption: "The only way to do a Friday.", time: "2 days ago", likes: 1204 },
-  { venue: "KOMODO", caption: "Dinner turned into a night.", time: "3 days ago", likes: 617 },
+const SERVICES = [
+  {
+    id: "dining",
+    name: "Dinner Reservations",
+    tagline: "Hard-to-Get Tables",
+    description:
+      "Last-minute tables at Carbone, Komodo, Le Jardinier, and every other place that's technically fully booked. We have the relationships.",
+    gradient: "linear-gradient(160deg, #1e1005 0%, #0a0603 55%, #050505 100%)",
+    inquireMessage:
+      "I need a reservation at a top Miami restaurant, ideally tonight or this week. Can you help me get a table?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M18 8h1a4 4 0 010 8h-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6 1v3M10 1v3M14 1v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "vip",
+    name: "VIP Nightlife",
+    tagline: "Tables · Guest Lists · Bottle Service",
+    description:
+      "Skip the line and get the best tables at LIV, E11EVEN, MYNT, and every club in the city. Your concierge handles everything.",
+    gradient: "linear-gradient(160deg, #1a0b2e 0%, #0d0614 55%, #050505 100%)",
+    inquireMessage:
+      "I want to plan a VIP night out in Miami. Can you help me get tables and guest list access?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M19 16l.75 2.25L22 19l-2.25.75L19 22l-.75-2.25L16 19l2.25-.75L19 16z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "yacht",
+    name: "Yacht Charters",
+    tagline: "Private Day & Sunset Cruises",
+    description:
+      "Set sail on Biscayne Bay or the open Atlantic aboard a private yacht. From intimate sunset cruises to full-day adventures with crew.",
+    gradient: "linear-gradient(160deg, #0a1020 0%, #06080f 55%, #050505 100%)",
+    inquireMessage:
+      "I'd like to inquire about a private yacht charter in Miami. Can you help me plan something?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M3 17c2.5-4 5-6 9-6s6.5 2 9 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M12 11V5l5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 20h20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "hotel",
+    name: "Hotel Suites",
+    tagline: "Penthouses & Private Villas",
+    description:
+      "From oceanfront penthouses at the Faena to private villas on Star Island. Access to rooms that aren't available to the public.",
+    gradient: "linear-gradient(160deg, #1a0a10 0%, #0a0506 55%, #050505 100%)",
+    inquireMessage:
+      "I'm looking for a luxury hotel suite or villa in Miami. Can you find me something exceptional?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M3 21V8l9-5 9 5v13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 21v-6h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 11h.01M15 11h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "car",
+    name: "Luxury Cars",
+    tagline: "Lamborghini · Ferrari · Rolls-Royce",
+    description:
+      "Arrive the way Miami demands. Exotic and ultra-luxury vehicles available by the hour, day, or weekend with concierge delivery.",
+    gradient: "linear-gradient(160deg, #0a1a10 0%, #050a06 55%, #050505 100%)",
+    inquireMessage:
+      "I'd like to arrange a luxury or exotic car rental in Miami. What do you have available?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M5 17H3v-5l2-5h14l2 5v5h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="7.5" cy="17" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="16.5" cy="17" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M5.5 12h13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "jet",
+    name: "Private Jets",
+    tagline: "On-Demand Air Travel",
+    description:
+      "Door-to-door private aviation with no queues, no crowds. Light jets to heavy cabins — wherever the night takes you.",
+    gradient: "linear-gradient(160deg, #14100a 0%, #0a0806 55%, #050505 100%)",
+    inquireMessage:
+      "I need to arrange a private jet. Can you help me with routing, availability, and pricing?",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/70">
+        <path d="M21 7l-7 5-8-4-4 2 6 5-2 4 3-1 2-4 8 3 2-3-6-4 4-3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 const hotVenues = VENUES.filter((v) => v.hot);
-const featured = VENUES.find((v) => v.id === "liv")!;
 
 export default function HomePage() {
   return (
@@ -24,126 +120,93 @@ export default function HomePage() {
       className="min-h-screen bg-nocte-black text-nocte-cream"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 64px)" }}
     >
-      {/* Hero */}
-      <section className="relative px-6 pt-20 pb-16 overflow-hidden">
-        {/* Subtle radial glow */}
+      {/* Hero + Concierge prompt */}
+      <section className="relative px-6 pt-20 pb-12 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background: "radial-gradient(ellipse at 50% 20%, rgba(201,168,76,0.06) 0%, transparent 60%)",
           }}
         />
-
         <div className="relative">
           <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-4">
             Miami&apos;s Luxury Concierge
           </p>
           <h1
-            className="font-display font-light text-nocte-cream tracking-[0.25em] leading-none mb-6"
+            className="font-display font-light text-nocte-cream tracking-[0.25em] leading-none mb-4"
             style={{ fontSize: "clamp(3.5rem, 18vw, 5.5rem)" }}
           >
             NOCT&#274;
           </h1>
           <p className="font-sans text-sm text-nocte-muted leading-relaxed max-w-[320px] mb-8">
-            Your personal connection to the best of Miami nightlife. Tables, guest lists, and luxury services — all through one conversation.
+            Dinner reservations, tables, guest lists, and luxury services — all through one conversation.
           </p>
+
+          {/* Concierge prompt */}
           <Link
             href="/concierge"
-            className="inline-flex items-center gap-3 border border-nocte-gold text-nocte-gold font-sans text-[11px] tracking-[0.25em] uppercase px-7 py-4 hover:bg-nocte-gold hover:text-nocte-black transition-all duration-300"
+            className="flex items-center gap-3 border border-nocte-border bg-nocte-surface px-4 py-3.5 hover:border-nocte-gold/40 transition-colors duration-200 group"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
+            <div
+              className="w-8 h-8 flex-shrink-0 flex items-center justify-center border border-nocte-gold/25"
+              style={{ background: "linear-gradient(135deg, #1a1205, #050505)" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-nocte-gold">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="font-sans text-sm text-nocte-muted/50 group-hover:text-nocte-muted transition-colors">
+              What are you planning tonight?
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/40 ml-auto flex-shrink-0">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Start a Conversation
           </Link>
         </div>
       </section>
 
-      {/* Featured Venue */}
+      {/* Services */}
       <section className="px-6 mb-12">
         <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-4">
-          Featured Tonight
+          Services
         </p>
-        <Link href={`/venues/${featured.id}`}>
-          <div
-            className="relative overflow-hidden group cursor-pointer border border-nocte-border hover:border-nocte-gold/30 transition-colors duration-300"
-            style={{ background: featured.gradient, aspectRatio: "16/9" }}
-          >
-            {/* Grid texture */}
-            <div
-              className="absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(201,168,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px)",
-                backgroundSize: "48px 48px",
-              }}
-            />
-            <div className="absolute inset-0 bg-nocte-gold/0 group-hover:bg-nocte-gold/5 transition-colors duration-300" />
-            <div className="absolute bottom-0 left-0 right-0 h-3/4 bg-gradient-to-t from-black/80 to-transparent" />
-
-            {/* Hot badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-nocte-gold animate-pulse" />
-              <span className="font-sans text-[9px] tracking-[0.2em] text-nocte-gold uppercase">
-                Hot Tonight
-              </span>
-            </div>
-
-            {/* Content */}
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <p className="font-sans text-[9px] text-nocte-gold/80 tracking-[0.2em] uppercase mb-1">
-                {featured.type} &middot; {featured.neighborhood}
-              </p>
-              <h2
-                className="font-display font-light text-nocte-cream tracking-[0.2em] leading-none mb-2"
-                style={{ fontSize: "clamp(2rem, 10vw, 3rem)" }}
+        <div className="space-y-3">
+          {SERVICES.map((service) => (
+            <Link
+              key={service.id}
+              href={`/concierge?message=${encodeURIComponent(service.inquireMessage)}`}
+            >
+              <div
+                className="relative overflow-hidden border border-nocte-border hover:border-nocte-gold/30 transition-colors duration-300"
+                style={{ background: service.gradient }}
               >
-                {featured.name}
-              </h2>
-              <p className="font-sans text-xs text-nocte-muted line-clamp-2">
-                {featured.description}
-              </p>
-            </div>
-          </div>
-        </Link>
-      </section>
-
-      {/* Neighborhoods */}
-      <section className="mb-12">
-        <div className="px-6 mb-4 flex items-end justify-between">
-          <div>
-            <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-2">
-              Explore
-            </p>
-            <h2 className="font-display text-2xl font-light text-nocte-cream tracking-[0.1em]">
-              Neighborhoods
-            </h2>
-          </div>
-          <Link
-            href="/discover"
-            className="font-sans text-[10px] text-nocte-muted tracking-[0.15em] uppercase hover:text-nocte-gold transition-colors duration-200"
-          >
-            View all
-          </Link>
-        </div>
-        <div className="flex gap-3 overflow-x-auto px-6" style={{ scrollbarWidth: "none" }}>
-          {NEIGHBORHOODS.map((hood) => (
-            <Link key={hood.name} href={`/discover`}>
-              <div className="flex-shrink-0 w-[160px] border border-nocte-border p-4 hover:border-nocte-gold/30 transition-colors duration-300 bg-nocte-surface">
-                <h3 className="font-display text-lg font-light text-nocte-cream tracking-[0.1em] mb-1">
-                  {hood.name}
-                </h3>
-                <p className="font-sans text-[10px] text-nocte-muted tracking-wide mb-3">
-                  {hood.tagline}
-                </p>
-                <p className="font-sans text-[9px] text-nocte-gold tracking-[0.2em] uppercase">
-                  {hood.count} venue{hood.count !== 1 ? "s" : ""}
-                </p>
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px), repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px)",
+                    opacity: 0.04,
+                  }}
+                />
+                <div className="relative flex items-center gap-4 p-5">
+                  <div
+                    className="flex-shrink-0 w-12 h-12 flex items-center justify-center border border-nocte-gold/15"
+                    style={{ background: "linear-gradient(135deg, rgba(201,168,76,0.08), rgba(5,5,5,0.8))" }}
+                  >
+                    {service.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans text-[9px] text-nocte-gold tracking-[0.2em] uppercase mb-0.5">
+                      {service.tagline}
+                    </p>
+                    <h2 className="font-display text-lg font-light text-nocte-cream tracking-[0.05em]">
+                      {service.name}
+                    </h2>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/30 flex-shrink-0">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
               </div>
             </Link>
           ))}
@@ -178,7 +241,6 @@ export default function HomePage() {
                   aspectRatio: "3/4",
                 }}
               >
-                {/* Grid texture */}
                 <div
                   className="absolute inset-0 opacity-[0.04]"
                   style={{
@@ -189,15 +251,10 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-nocte-gold/0 group-hover:bg-nocte-gold/5 transition-colors duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/70 to-transparent" />
-
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <div className="flex items-start justify-between">
-                    <span className="font-sans text-[9px] tracking-[0.2em] text-nocte-gold uppercase">
-                      Hot
-                    </span>
-                    <span className="font-sans text-[9px] text-nocte-muted">
-                      {venue.priceRange}
-                    </span>
+                    <span className="font-sans text-[9px] tracking-[0.2em] text-nocte-gold uppercase">Hot</span>
+                    <span className="font-sans text-[9px] text-nocte-muted">{venue.priceRange}</span>
                   </div>
                   <div>
                     <h3
@@ -206,12 +263,8 @@ export default function HomePage() {
                     >
                       {venue.name}
                     </h3>
-                    <p className="font-sans text-[10px] text-nocte-muted mb-2">
-                      {venue.type}
-                    </p>
-                    <p className="font-sans text-[9px] text-nocte-muted/70 tracking-[0.1em] uppercase">
-                      {venue.neighborhood}
-                    </p>
+                    <p className="font-sans text-[10px] text-nocte-muted mb-2">{venue.type}</p>
+                    <p className="font-sans text-[9px] text-nocte-muted/70 tracking-[0.1em] uppercase">{venue.neighborhood}</p>
                   </div>
                 </div>
               </div>
@@ -220,50 +273,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Feed Preview */}
-      <section className="px-6 mb-12">
-        <div className="mb-4 flex items-end justify-between">
+      {/* Neighborhoods */}
+      <section className="mb-12">
+        <div className="px-6 mb-4 flex items-end justify-between">
           <div>
-            <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-2">
-              Real Nights
-            </p>
-            <h2 className="font-display text-2xl font-light text-nocte-cream tracking-[0.1em]">
-              From the Feed
-            </h2>
+            <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-2">Explore</p>
+            <h2 className="font-display text-2xl font-light text-nocte-cream tracking-[0.1em]">Neighborhoods</h2>
           </div>
-          <Link
-            href="/feed"
-            className="font-sans text-[10px] text-nocte-muted tracking-[0.15em] uppercase hover:text-nocte-gold transition-colors duration-200"
-          >
+          <Link href="/discover" className="font-sans text-[10px] text-nocte-muted tracking-[0.15em] uppercase hover:text-nocte-gold transition-colors duration-200">
             View all
           </Link>
         </div>
-        <div className="flex flex-col gap-3">
-          {FEED_PREVIEW.map((post, i) => (
-            <Link key={i} href="/feed">
-              <div className="border border-nocte-border bg-nocte-surface p-4 hover:border-nocte-gold/30 transition-colors duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-display text-base font-light text-nocte-cream tracking-[0.1em]">
-                    {post.venue}
-                  </p>
-                  <p className="font-sans text-[9px] text-nocte-muted tracking-wide">
-                    {post.time}
-                  </p>
-                </div>
-                <p className="font-sans text-xs text-nocte-muted leading-relaxed italic mb-2">
-                  &ldquo;{post.caption}&rdquo;
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-nocte-gold/60">
-                    <path
-                      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span className="font-sans text-[9px] text-nocte-muted/70">
-                    {post.likes.toLocaleString()}
-                  </span>
-                </div>
+        <div className="flex gap-3 overflow-x-auto px-6" style={{ scrollbarWidth: "none" }}>
+          {NEIGHBORHOODS.map((hood) => (
+            <Link key={hood.name} href="/discover">
+              <div className="flex-shrink-0 w-[160px] border border-nocte-border p-4 hover:border-nocte-gold/30 transition-colors duration-300 bg-nocte-surface">
+                <h3 className="font-display text-lg font-light text-nocte-cream tracking-[0.1em] mb-1">{hood.name}</h3>
+                <p className="font-sans text-[10px] text-nocte-muted tracking-wide mb-3">{hood.tagline}</p>
+                <p className="font-sans text-[9px] text-nocte-gold tracking-[0.2em] uppercase">{hood.count} venue{hood.count !== 1 ? "s" : ""}</p>
               </div>
             </Link>
           ))}
@@ -300,13 +327,7 @@ export default function HomePage() {
             >
               Start Planning
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M5 12h14M13 6l6 6-6 6"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
           </div>
