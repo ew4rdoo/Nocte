@@ -38,7 +38,31 @@ type PartnerApp = {
   created_at: string;
 };
 
-type Tab = "bookings" | "partners";
+type VenueSubmission = {
+  id: string;
+  venue_name: string;
+  venue_type: string;
+  neighborhood: string;
+  address: string;
+  capacity: string;
+  description: string;
+  vibe: string[];
+  price_range: string;
+  hours: string;
+  dress_code: string;
+  tables: { name: string; location: string; description: string; capacity_min: number; capacity_max: number; minimum_spend: number }[];
+  contact_name: string;
+  contact_role: string;
+  contact_email: string;
+  contact_phone: string;
+  website?: string;
+  instagram?: string;
+  notes?: string;
+  status: string;
+  created_at: string;
+};
+
+type Tab = "bookings" | "partners" | "onboarding";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "text-yellow-400 border-yellow-400/30",
@@ -68,7 +92,7 @@ export default function AdminPage() {
           Admin
         </h1>
         <div className="flex gap-0">
-          {(["bookings", "partners"] as const).map((t) => (
+          {(["bookings", "partners", "onboarding"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -84,7 +108,9 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {tab === "bookings" ? <BookingsTab /> : <PartnersTab />}
+      {tab === "bookings" && <BookingsTab />}
+      {tab === "partners" && <PartnersTab />}
+      {tab === "onboarding" && <OnboardingTab />}
     </div>
   );
 }
@@ -426,6 +452,238 @@ function PartnersTab() {
               </div>
 
               <p className="font-sans text-[9px] text-nocte-muted/40 mt-3 tracking-[0.1em]">{a.id}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Onboarding Tab ───
+
+const ONBOARDING_STATUSES = ["all", "new", "reviewing", "approved", "declined"];
+
+function OnboardingTab() {
+  const [submissions, setSubmissions] = useState<VenueSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const fetchSubmissions = useCallback(async () => {
+    const params = filter !== "all" ? `?status=${filter}` : "";
+    const res = await fetch(`/api/onboard${params}`);
+    const data = await res.json();
+    setSubmissions(data.submissions || []);
+    setLoading(false);
+  }, [filter]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
+
+  async function updateStatus(id: string, status: string) {
+    setUpdating(id);
+    await fetch(`/api/onboard/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    await fetchSubmissions();
+    setUpdating(null);
+  }
+
+  function formatCreatedAt(iso: string) {
+    return new Date(iso).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  return (
+    <>
+      <div className="px-6 py-4 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+        {ONBOARDING_STATUSES.map((s) => (
+          <button
+            key={s}
+            onClick={() => { setFilter(s); setLoading(true); }}
+            className={`flex-shrink-0 font-sans text-[10px] tracking-[0.15em] uppercase border px-3 py-2 transition-all duration-200 ${
+              filter === s
+                ? "border-nocte-gold text-nocte-gold"
+                : "border-nocte-border text-nocte-muted hover:border-nocte-gold/40"
+            }`}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-6 pb-4">
+        <p className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase">
+          {loading ? "Loading…" : `${submissions.length} submission${submissions.length !== 1 ? "s" : ""}`}
+        </p>
+      </div>
+
+      {!loading && submissions.length === 0 ? (
+        <div className="px-6 py-20 text-center">
+          <p className="font-display text-2xl font-light text-nocte-cream italic mb-2">No submissions yet</p>
+          <p className="font-sans text-xs text-nocte-muted">Share your /onboard page with venue managers to start receiving submissions.</p>
+        </div>
+      ) : (
+        <div className="px-6 flex flex-col gap-3">
+          {submissions.map((s) => (
+            <div
+              key={s.id}
+              className="border border-nocte-border p-5"
+              style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-display text-lg font-light text-nocte-cream tracking-wide">{s.venue_name}</p>
+                  <p className="font-sans text-[10px] text-nocte-muted tracking-[0.1em] uppercase">{s.venue_type} · {s.neighborhood} · {s.price_range}</p>
+                </div>
+                <span className={`font-sans text-[9px] tracking-[0.2em] uppercase border px-2 py-1 ${STATUS_COLORS[s.status] || "text-nocte-muted border-nocte-border"}`}>
+                  {s.status}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Contact</p>
+                  <p className="font-sans text-xs text-nocte-cream">{s.contact_name}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Role</p>
+                  <p className="font-sans text-xs text-nocte-cream">{s.contact_role}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Email</p>
+                  <p className="font-sans text-xs text-nocte-cream truncate">{s.contact_email}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Phone</p>
+                  <p className="font-sans text-xs text-nocte-cream">{s.contact_phone}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Capacity</p>
+                  <p className="font-sans text-xs text-nocte-cream">{s.capacity}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Tables</p>
+                  <p className="font-sans text-xs text-nocte-cream">{s.tables?.length || 0} configured</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Submitted</p>
+                  <p className="font-sans text-xs text-nocte-cream">{formatCreatedAt(s.created_at)}</p>
+                </div>
+              </div>
+
+              {/* Expandable detail */}
+              <button
+                type="button"
+                onClick={() => setExpanded(expanded === s.id ? null : s.id)}
+                className="font-sans text-[10px] text-nocte-muted hover:text-nocte-gold tracking-[0.15em] uppercase transition-colors mb-3"
+              >
+                {expanded === s.id ? "— Less" : "+ Details"}
+              </button>
+
+              {expanded === s.id && (
+                <div className="border-t border-nocte-border pt-3 mb-3 flex flex-col gap-3">
+                  <div>
+                    <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-1">Address</p>
+                    <p className="font-sans text-xs text-nocte-cream">{s.address}</p>
+                  </div>
+                  <div>
+                    <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-1">Description</p>
+                    <p className="font-sans text-xs text-nocte-cream leading-relaxed">{s.description}</p>
+                  </div>
+                  {s.vibe?.length > 0 && (
+                    <div>
+                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-1">Vibe</p>
+                      <div className="flex flex-wrap gap-1">
+                        {s.vibe.map((v) => (
+                          <span key={v} className="font-sans text-[9px] text-nocte-gold border border-nocte-gold/30 px-2 py-0.5 tracking-[0.1em] uppercase">{v}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Hours</p>
+                      <p className="font-sans text-xs text-nocte-cream">{s.hours}</p>
+                    </div>
+                    {s.dress_code && (
+                      <div>
+                        <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Dress Code</p>
+                        <p className="font-sans text-xs text-nocte-cream">{s.dress_code}</p>
+                      </div>
+                    )}
+                  </div>
+                  {(s.website || s.instagram) && (
+                    <div className="flex gap-4">
+                      {s.website && (
+                        <div>
+                          <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Website</p>
+                          <p className="font-sans text-xs text-nocte-gold">{s.website}</p>
+                        </div>
+                      )}
+                      {s.instagram && (
+                        <div>
+                          <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Instagram</p>
+                          <p className="font-sans text-xs text-nocte-gold">{s.instagram}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {s.tables?.length > 0 && (
+                    <div>
+                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-2">Tables</p>
+                      <div className="flex flex-col gap-2">
+                        {s.tables.map((t, i) => (
+                          <div key={i} className="border border-nocte-border/50 p-3 bg-nocte-black/50">
+                            <p className="font-sans text-xs text-nocte-cream">{t.name} <span className="text-nocte-muted">· {t.location}</span></p>
+                            {t.description && <p className="font-sans text-[10px] text-nocte-muted mt-1">{t.description}</p>}
+                            <p className="font-sans text-[10px] text-nocte-muted mt-1">
+                              {t.capacity_min}–{t.capacity_max} guests
+                              {t.minimum_spend > 0 && <span className="text-nocte-gold"> · ${t.minimum_spend.toLocaleString()} min</span>}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {s.notes && (
+                    <div>
+                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-1">Notes</p>
+                      <p className="font-sans text-xs text-nocte-cream italic">&ldquo;{s.notes}&rdquo;</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2 border-t border-nocte-border">
+                {s.status === "new" && (
+                  <>
+                    <button onClick={() => updateStatus(s.id, "reviewing")} disabled={updating === s.id} className="flex-1 border border-yellow-400/40 text-yellow-400 font-sans text-[10px] tracking-[0.2em] uppercase py-2 hover:bg-yellow-400/10 transition-all duration-200 disabled:opacity-40">Review</button>
+                    <button onClick={() => updateStatus(s.id, "approved")} disabled={updating === s.id} className="flex-1 border border-nocte-gold text-nocte-gold font-sans text-[10px] tracking-[0.2em] uppercase py-2 hover:bg-nocte-gold hover:text-nocte-black transition-all duration-200 disabled:opacity-40">Approve</button>
+                    <button onClick={() => updateStatus(s.id, "declined")} disabled={updating === s.id} className="flex-1 border border-nocte-border text-nocte-muted font-sans text-[10px] tracking-[0.2em] uppercase py-2 hover:border-red-400/40 hover:text-red-400 transition-all duration-200 disabled:opacity-40">Decline</button>
+                  </>
+                )}
+                {s.status === "reviewing" && (
+                  <>
+                    <button onClick={() => updateStatus(s.id, "approved")} disabled={updating === s.id} className="flex-1 border border-nocte-gold text-nocte-gold font-sans text-[10px] tracking-[0.2em] uppercase py-2 hover:bg-nocte-gold hover:text-nocte-black transition-all duration-200 disabled:opacity-40">Approve</button>
+                    <button onClick={() => updateStatus(s.id, "declined")} disabled={updating === s.id} className="flex-1 border border-nocte-border text-nocte-muted font-sans text-[10px] tracking-[0.2em] uppercase py-2 hover:border-red-400/40 hover:text-red-400 transition-all duration-200 disabled:opacity-40">Decline</button>
+                  </>
+                )}
+                {(s.status === "approved" || s.status === "declined") && (
+                  <p className="font-sans text-[10px] text-nocte-muted/50 tracking-[0.1em] uppercase py-2">{s.status === "approved" ? "Venue approved" : "Submission declined"}</p>
+                )}
+              </div>
+
+              <p className="font-sans text-[9px] text-nocte-muted/40 mt-3 tracking-[0.1em]">{s.id}</p>
             </div>
           ))}
         </div>
