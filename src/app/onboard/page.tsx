@@ -41,14 +41,6 @@ function formatSpend(v: number): string {
   return `$${v}`;
 }
 
-function nearestStop(v: number): number {
-  let closest = SPEND_STOPS[0];
-  for (const s of SPEND_STOPS) {
-    if (Math.abs(s - v) < Math.abs(closest - v)) closest = s;
-  }
-  return closest;
-}
-
 export default function OnboardPage() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -73,8 +65,8 @@ export default function OnboardPage() {
   // Step 3: Service — Club
   const [vipTables, setVipTables] = useState("0");
   const [standardTables, setStandardTables] = useState("0");
-  const [minSpendLow, setMinSpendLow] = useState(1);
-  const [minSpendHigh, setMinSpendHigh] = useState(8);
+  const [minSpendLow, setMinSpendLow] = useState(500);
+  const [minSpendHigh, setMinSpendHigh] = useState(7500);
   const [hasOutdoor, setHasOutdoor] = useState(false);
   const [hasMezzanine, setHasMezzanine] = useState(false);
   const [hasDjAdjacent, setHasDjAdjacent] = useState(false);
@@ -90,8 +82,8 @@ export default function OnboardPage() {
 
   // Step 3: Service — Rooftop
   const [bottleTableCount, setBottleTableCount] = useState("0");
-  const [rooftopMinLow, setRooftopMinLow] = useState(1);
-  const [rooftopMinHigh, setRooftopMinHigh] = useState(7);
+  const [rooftopMinLow, setRooftopMinLow] = useState(500);
+  const [rooftopMinHigh, setRooftopMinHigh] = useState(5000);
   const [generalSeating, setGeneralSeating] = useState("");
   const [sections, setSections] = useState<string[]>([]);
 
@@ -124,8 +116,8 @@ export default function OnboardPage() {
         category: "club",
         vip_tables: parseInt(vipTables) || 0,
         standard_tables: parseInt(standardTables) || 0,
-        min_spend_low: SPEND_STOPS[minSpendLow] ?? 0,
-        min_spend_high: SPEND_STOPS[minSpendHigh] ?? 0,
+        min_spend_low: minSpendLow,
+        min_spend_high: minSpendHigh,
         has_outdoor: hasOutdoor,
         has_mezzanine: hasMezzanine,
         has_dj_adjacent: hasDjAdjacent,
@@ -146,8 +138,8 @@ export default function OnboardPage() {
     return {
       category: "rooftop",
       bottle_table_count: parseInt(bottleTableCount) || 0,
-      min_spend_low: SPEND_STOPS[rooftopMinLow] ?? 0,
-      min_spend_high: SPEND_STOPS[rooftopMinHigh] ?? 0,
+      min_spend_low: rooftopMinLow,
+      min_spend_high: rooftopMinHigh,
       general_seating: parseInt(generalSeating) || 0,
       sections,
     };
@@ -660,28 +652,31 @@ function CounterField({ label, value, onChange }: {
   );
 }
 
-function SpendInput({ value, stops, onChange, align }: {
+function toStopIndex(amount: number, stops: number[]): number {
+  let closest = 0;
+  for (let i = 0; i < stops.length; i++) {
+    if (Math.abs(stops[i] - amount) < Math.abs(stops[closest] - amount)) closest = i;
+  }
+  return closest;
+}
+
+function SpendInput({ value, onChange, align }: {
   value: number;
-  stops: number[];
-  onChange: (stopIndex: number) => void;
+  onChange: (amount: number) => void;
   align: "left" | "right";
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
   function startEdit() {
-    setDraft(String(stops[value]));
+    setDraft(String(value));
     setEditing(true);
   }
 
   function commit() {
     setEditing(false);
     const num = parseInt(draft.replace(/[^0-9]/g, "")) || 0;
-    let closest = 0;
-    for (let i = 0; i < stops.length; i++) {
-      if (Math.abs(stops[i] - num) < Math.abs(stops[closest] - num)) closest = i;
-    }
-    onChange(closest);
+    onChange(Math.max(0, num));
   }
 
   if (editing) {
@@ -705,7 +700,7 @@ function SpendInput({ value, stops, onChange, align }: {
       onClick={startEdit}
       className="font-sans text-sm text-nocte-gold border-b border-dashed border-nocte-gold/40 hover:border-nocte-gold transition-colors"
     >
-      {formatSpend(stops[value])}
+      {formatSpend(value)}
     </button>
   );
 }
@@ -714,29 +709,31 @@ function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
   low: number;
   high: number;
   stops: number[];
-  onLowChange: (v: number) => void;
-  onHighChange: (v: number) => void;
+  onLowChange: (amount: number) => void;
+  onHighChange: (amount: number) => void;
 }) {
   const max = stops.length - 1;
-  const leftPct = (low / max) * 100;
-  const rightPct = (high / max) * 100;
-  const midpoint = (low + high) / 2;
+  const lowIdx = toStopIndex(low, stops);
+  const highIdx = Math.min(toStopIndex(high, stops), max);
+  const leftPct = (lowIdx / max) * 100;
+  const rightPct = (highIdx / max) * 100;
+  const midIdx = (lowIdx + highIdx) / 2;
 
-  function handleInput(e: React.ChangeEvent<HTMLInputElement>, which: "low" | "high") {
-    const v = parseInt(e.target.value);
+  function handleSlider(e: React.ChangeEvent<HTMLInputElement>, which: "low" | "high") {
+    const idx = parseInt(e.target.value);
     if (which === "low") {
-      onLowChange(Math.min(v, high));
+      onLowChange(stops[Math.min(idx, highIdx)]);
     } else {
-      onHighChange(Math.max(v, low));
+      onHighChange(stops[Math.max(idx, lowIdx)]);
     }
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <SpendInput value={low} stops={stops} onChange={(i) => onLowChange(Math.min(i, high))} align="left" />
+        <SpendInput value={low} onChange={(v) => onLowChange(Math.min(v, high))} align="left" />
         <span className="font-sans text-[10px] text-nocte-muted tracking-[0.1em] uppercase">to</span>
-        <SpendInput value={high} stops={stops} onChange={(i) => onHighChange(Math.max(i, low))} align="right" />
+        <SpendInput value={high} onChange={(v) => onHighChange(Math.max(v, low))} align="right" />
       </div>
       <div className="relative h-10">
         <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[2px] bg-nocte-border" />
@@ -744,25 +741,23 @@ function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
           className="absolute top-1/2 -translate-y-1/2 h-[2px] bg-nocte-gold"
           style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }}
         />
-        {/* Low handle — clips to left half of range */}
         <input
           type="range"
           min={0}
           max={max}
-          value={low}
-          onChange={(e) => handleInput(e, "low")}
+          value={lowIdx}
+          onChange={(e) => handleSlider(e, "low")}
           className="absolute h-full opacity-0 cursor-pointer"
-          style={{ zIndex: 3, left: 0, width: `${((midpoint) / max) * 100}%` }}
+          style={{ zIndex: 3, left: 0, width: `${((midIdx) / max) * 100}%` }}
         />
-        {/* High handle — clips to right half of range */}
         <input
           type="range"
           min={0}
           max={max}
-          value={high}
-          onChange={(e) => handleInput(e, "high")}
+          value={highIdx}
+          onChange={(e) => handleSlider(e, "high")}
           className="absolute h-full opacity-0 cursor-pointer"
-          style={{ zIndex: 3, left: `${((midpoint) / max) * 100}%`, width: `${100 - ((midpoint) / max) * 100}%` }}
+          style={{ zIndex: 3, left: `${((midIdx) / max) * 100}%`, width: `${100 - ((midIdx) / max) * 100}%` }}
         />
         <div
           className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-nocte-gold bg-nocte-black pointer-events-none"
