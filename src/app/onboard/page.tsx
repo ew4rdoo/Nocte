@@ -660,6 +660,56 @@ function CounterField({ label, value, onChange }: {
   );
 }
 
+function SpendInput({ value, stops, onChange, align }: {
+  value: number;
+  stops: number[];
+  onChange: (stopIndex: number) => void;
+  align: "left" | "right";
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  function startEdit() {
+    setDraft(String(stops[value]));
+    setEditing(true);
+  }
+
+  function commit() {
+    setEditing(false);
+    const num = parseInt(draft.replace(/[^0-9]/g, "")) || 0;
+    let closest = 0;
+    for (let i = 0; i < stops.length; i++) {
+      if (Math.abs(stops[i] - num) < Math.abs(stops[closest] - num)) closest = i;
+    }
+    onChange(closest);
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        type="text"
+        inputMode="numeric"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === "Enter" && commit()}
+        className={`font-sans text-sm text-nocte-gold bg-nocte-surface border border-nocte-gold px-2 py-1 w-24 focus:outline-none ${align === "right" ? "text-right" : "text-left"}`}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={startEdit}
+      className="font-sans text-sm text-nocte-gold border-b border-dashed border-nocte-gold/40 hover:border-nocte-gold transition-colors"
+    >
+      {formatSpend(stops[value])}
+    </button>
+  );
+}
+
 function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
   low: number;
   high: number;
@@ -684,9 +734,9 @@ function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <span className="font-sans text-sm text-nocte-gold">{formatSpend(stops[low])}</span>
+        <SpendInput value={low} stops={stops} onChange={(i) => onLowChange(Math.min(i, high))} align="left" />
         <span className="font-sans text-[10px] text-nocte-muted tracking-[0.1em] uppercase">to</span>
-        <span className="font-sans text-sm text-nocte-gold">{formatSpend(stops[high])}</span>
+        <SpendInput value={high} stops={stops} onChange={(i) => onHighChange(Math.max(i, low))} align="right" />
       </div>
       <div className="relative h-10">
         <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[2px] bg-nocte-border" />
