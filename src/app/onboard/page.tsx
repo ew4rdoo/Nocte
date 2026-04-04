@@ -73,8 +73,8 @@ export default function OnboardPage() {
   // Step 3: Service — Club
   const [vipTables, setVipTables] = useState("0");
   const [standardTables, setStandardTables] = useState("0");
-  const [minSpendLow, setMinSpendLow] = useState(6);
-  const [minSpendHigh, setMinSpendHigh] = useState(10);
+  const [minSpendLow, setMinSpendLow] = useState(1);
+  const [minSpendHigh, setMinSpendHigh] = useState(8);
   const [hasOutdoor, setHasOutdoor] = useState(false);
   const [hasMezzanine, setHasMezzanine] = useState(false);
   const [hasDjAdjacent, setHasDjAdjacent] = useState(false);
@@ -90,8 +90,8 @@ export default function OnboardPage() {
 
   // Step 3: Service — Rooftop
   const [bottleTableCount, setBottleTableCount] = useState("0");
-  const [rooftopMinLow, setRooftopMinLow] = useState(4);
-  const [rooftopMinHigh, setRooftopMinHigh] = useState(8);
+  const [rooftopMinLow, setRooftopMinLow] = useState(1);
+  const [rooftopMinHigh, setRooftopMinHigh] = useState(7);
   const [generalSeating, setGeneralSeating] = useState("");
   const [sections, setSections] = useState<string[]>([]);
 
@@ -668,17 +668,18 @@ function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
   onHighChange: (v: number) => void;
 }) {
   const max = stops.length - 1;
-
-  function handleLow(v: number) {
-    onLowChange(Math.min(v, high));
-  }
-
-  function handleHigh(v: number) {
-    onHighChange(Math.max(v, low));
-  }
-
   const leftPct = (low / max) * 100;
   const rightPct = (high / max) * 100;
+  const midpoint = (low + high) / 2;
+
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>, which: "low" | "high") {
+    const v = parseInt(e.target.value);
+    if (which === "low") {
+      onLowChange(Math.min(v, high));
+    } else {
+      onHighChange(Math.max(v, low));
+    }
+  }
 
   return (
     <div>
@@ -693,23 +694,25 @@ function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
           className="absolute top-1/2 -translate-y-1/2 h-[2px] bg-nocte-gold"
           style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }}
         />
+        {/* Low handle — clips to left half of range */}
         <input
           type="range"
           min={0}
           max={max}
           value={low}
-          onChange={(e) => handleLow(parseInt(e.target.value))}
-          className="absolute w-full h-full opacity-0 cursor-pointer"
-          style={{ zIndex: low === high ? 2 : 1 }}
+          onChange={(e) => handleInput(e, "low")}
+          className="absolute h-full opacity-0 cursor-pointer"
+          style={{ zIndex: 3, left: 0, width: `${((midpoint) / max) * 100}%` }}
         />
+        {/* High handle — clips to right half of range */}
         <input
           type="range"
           min={0}
           max={max}
           value={high}
-          onChange={(e) => handleHigh(parseInt(e.target.value))}
-          className="absolute w-full h-full opacity-0 cursor-pointer"
-          style={{ zIndex: 2 }}
+          onChange={(e) => handleInput(e, "high")}
+          className="absolute h-full opacity-0 cursor-pointer"
+          style={{ zIndex: 3, left: `${((midpoint) / max) * 100}%`, width: `${100 - ((midpoint) / max) * 100}%` }}
         />
         <div
           className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-nocte-gold bg-nocte-black pointer-events-none"
