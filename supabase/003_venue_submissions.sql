@@ -10,7 +10,7 @@ create table venue_submissions (
   price_range text not null,
   hours text not null,
   dress_code text not null default '',
-  tables text not null default '[]',
+  service_info text not null default '{}',
   contact_name text not null,
   contact_role text not null,
   contact_email text not null,

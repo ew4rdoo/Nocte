@@ -38,6 +38,11 @@ type PartnerApp = {
   created_at: string;
 };
 
+type ServiceInfo =
+  | { category: "club"; vip_tables: number; standard_tables: number; min_spend_low: number; min_spend_high: number; has_outdoor: boolean; has_mezzanine: boolean; has_dj_adjacent: boolean; floor_plan_upload: boolean }
+  | { category: "restaurant"; seating_capacity: number; max_party_size: number; has_private_dining: boolean; private_dining_capacity: string; time_slots: string[]; has_prix_fixe: boolean }
+  | { category: "rooftop"; bottle_table_count: number; min_spend_low: number; min_spend_high: number; general_seating: number; sections: string[] };
+
 type VenueSubmission = {
   id: string;
   venue_name: string;
@@ -50,7 +55,7 @@ type VenueSubmission = {
   price_range: string;
   hours: string;
   dress_code: string;
-  tables: { name: string; location: string; description: string; capacity_min: number; capacity_max: number; minimum_spend: number }[];
+  service_info: ServiceInfo;
   contact_name: string;
   contact_role: string;
   contact_email: string;
@@ -572,8 +577,8 @@ function OnboardingTab() {
                   <p className="font-sans text-xs text-nocte-cream">{s.capacity}</p>
                 </div>
                 <div>
-                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Tables</p>
-                  <p className="font-sans text-xs text-nocte-cream">{s.tables?.length || 0} configured</p>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Service</p>
+                  <p className="font-sans text-xs text-nocte-cream">{formatServiceSummary(s.service_info)}</p>
                 </div>
                 <div>
                   <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Submitted</p>
@@ -638,21 +643,10 @@ function OnboardingTab() {
                       )}
                     </div>
                   )}
-                  {s.tables?.length > 0 && (
+                  {s.service_info && (
                     <div>
-                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-2">Tables</p>
-                      <div className="flex flex-col gap-2">
-                        {s.tables.map((t, i) => (
-                          <div key={i} className="border border-nocte-border/50 p-3 bg-nocte-black/50">
-                            <p className="font-sans text-xs text-nocte-cream">{t.name} <span className="text-nocte-muted">· {t.location}</span></p>
-                            {t.description && <p className="font-sans text-[10px] text-nocte-muted mt-1">{t.description}</p>}
-                            <p className="font-sans text-[10px] text-nocte-muted mt-1">
-                              {t.capacity_min}–{t.capacity_max} guests
-                              {t.minimum_spend > 0 && <span className="text-nocte-gold"> · ${t.minimum_spend.toLocaleString()} min</span>}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+                      <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase mb-2">Service Details</p>
+                      <ServiceInfoDetail info={s.service_info} />
                     </div>
                   )}
                   {s.notes && (
@@ -689,5 +683,60 @@ function OnboardingTab() {
         </div>
       )}
     </>
+  );
+}
+
+function formatSpend(v: number): string {
+  if (v === 0) return "$0";
+  if (v >= 1000) return `$${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`;
+  return `$${v}`;
+}
+
+function formatServiceSummary(info: ServiceInfo): string {
+  if (!info?.category) return "—";
+  if (info.category === "club") return `${info.vip_tables} VIP + ${info.standard_tables} standard`;
+  if (info.category === "restaurant") return `${info.seating_capacity} seats, max ${info.max_party_size}`;
+  return `${info.bottle_table_count} bottle tables, ${info.general_seating} general`;
+}
+
+function ServiceInfoDetail({ info }: { info: ServiceInfo }) {
+  if (!info?.category) return null;
+
+  if (info.category === "club") {
+    const features = [
+      info.has_outdoor && "Outdoor",
+      info.has_mezzanine && "Mezzanine",
+      info.has_dj_adjacent && "DJ-Adjacent",
+    ].filter(Boolean);
+    return (
+      <div className="border border-nocte-border/50 p-3 bg-nocte-black/50 flex flex-col gap-1.5">
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">VIP Tables</span><span className="font-sans text-xs text-nocte-cream">{info.vip_tables}</span></div>
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Standard Tables</span><span className="font-sans text-xs text-nocte-cream">{info.standard_tables}</span></div>
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Min Spend</span><span className="font-sans text-xs text-nocte-gold">{formatSpend(info.min_spend_low)} – {formatSpend(info.min_spend_high)}</span></div>
+        {features.length > 0 && <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Features</span><span className="font-sans text-xs text-nocte-cream">{features.join(", ")}</span></div>}
+        {info.floor_plan_upload && <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Floor Plan</span><span className="font-sans text-xs text-nocte-gold">Setup requested</span></div>}
+      </div>
+    );
+  }
+
+  if (info.category === "restaurant") {
+    return (
+      <div className="border border-nocte-border/50 p-3 bg-nocte-black/50 flex flex-col gap-1.5">
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Seating</span><span className="font-sans text-xs text-nocte-cream">{info.seating_capacity} seats</span></div>
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Max Party</span><span className="font-sans text-xs text-nocte-cream">{info.max_party_size} guests</span></div>
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Private Dining</span><span className="font-sans text-xs text-nocte-cream">{info.has_private_dining ? `Yes — ${info.private_dining_capacity}` : "No"}</span></div>
+        {info.time_slots.length > 0 && <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Slots</span><span className="font-sans text-xs text-nocte-cream">{info.time_slots.join(", ")}</span></div>}
+        <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Prix Fixe</span><span className="font-sans text-xs text-nocte-cream">{info.has_prix_fixe ? "Yes" : "No"}</span></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-nocte-border/50 p-3 bg-nocte-black/50 flex flex-col gap-1.5">
+      <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Bottle Tables</span><span className="font-sans text-xs text-nocte-cream">{info.bottle_table_count}</span></div>
+      <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Min Spend</span><span className="font-sans text-xs text-nocte-gold">{formatSpend(info.min_spend_low)} – {formatSpend(info.min_spend_high)}</span></div>
+      <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">General Seating</span><span className="font-sans text-xs text-nocte-cream">{info.general_seating} guests</span></div>
+      {info.sections.length > 0 && <div className="flex justify-between"><span className="font-sans text-[10px] text-nocte-muted">Sections</span><span className="font-sans text-xs text-nocte-cream">{info.sections.join(", ")}</span></div>}
+    </div>
   );
 }

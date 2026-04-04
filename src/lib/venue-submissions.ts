@@ -1,13 +1,37 @@
 export type VenueSubmissionStatus = "new" | "reviewing" | "approved" | "declined";
 
-export type SubmittedTable = {
-  name: string;
-  location: string;
-  description: string;
-  capacity_min: number;
-  capacity_max: number;
-  minimum_spend: number;
+export type ClubServiceInfo = {
+  category: "club";
+  vip_tables: number;
+  standard_tables: number;
+  min_spend_low: number;
+  min_spend_high: number;
+  has_outdoor: boolean;
+  has_mezzanine: boolean;
+  has_dj_adjacent: boolean;
+  floor_plan_upload: boolean;
 };
+
+export type RestaurantServiceInfo = {
+  category: "restaurant";
+  seating_capacity: number;
+  max_party_size: number;
+  has_private_dining: boolean;
+  private_dining_capacity: string;
+  time_slots: string[];
+  has_prix_fixe: boolean;
+};
+
+export type RooftopServiceInfo = {
+  category: "rooftop";
+  bottle_table_count: number;
+  min_spend_low: number;
+  min_spend_high: number;
+  general_seating: number;
+  sections: string[];
+};
+
+export type ServiceInfo = ClubServiceInfo | RestaurantServiceInfo | RooftopServiceInfo;
 
 export type VenueSubmission = {
   id: string;
@@ -23,8 +47,8 @@ export type VenueSubmission = {
   price_range: "$" | "$$" | "$$$" | "$$$$";
   hours: string;
   dress_code: string;
-  // Tables
-  tables: SubmittedTable[];
+  // Service setup
+  service_info: ServiceInfo;
   // Contact
   contact_name: string;
   contact_role: string;
@@ -73,7 +97,7 @@ export async function createVenueSubmission(
     const { error } = await supabase.from("venue_submissions").insert({
       ...submission,
       vibe: JSON.stringify(submission.vibe),
-      tables: JSON.stringify(submission.tables),
+      service_info: JSON.stringify(submission.service_info),
     });
     if (error) throw new Error(`Failed to create submission: ${error.message}`);
   } else {
@@ -100,7 +124,7 @@ export async function listVenueSubmissions(filters?: {
     return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
       ...row,
       vibe: typeof row.vibe === "string" ? JSON.parse(row.vibe as string) : row.vibe,
-      tables: typeof row.tables === "string" ? JSON.parse(row.tables as string) : row.tables,
+      service_info: typeof row.service_info === "string" ? JSON.parse(row.service_info as string) : row.service_info,
     })) as VenueSubmission[];
   }
 
@@ -124,7 +148,7 @@ export async function getVenueSubmission(id: string): Promise<VenueSubmission | 
     return {
       ...row,
       vibe: typeof row.vibe === "string" ? JSON.parse(row.vibe as string) : row.vibe,
-      tables: typeof row.tables === "string" ? JSON.parse(row.tables as string) : row.tables,
+      service_info: typeof row.service_info === "string" ? JSON.parse(row.service_info as string) : row.service_info,
     } as VenueSubmission;
   }
 
@@ -148,7 +172,7 @@ export async function updateVenueSubmissionStatus(
     return {
       ...row,
       vibe: typeof row.vibe === "string" ? JSON.parse(row.vibe as string) : row.vibe,
-      tables: typeof row.tables === "string" ? JSON.parse(row.tables as string) : row.tables,
+      service_info: typeof row.service_info === "string" ? JSON.parse(row.service_info as string) : row.service_info,
     } as VenueSubmission;
   }
 

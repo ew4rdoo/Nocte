@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-type TableDraft = {
-  name: string;
-  location: string;
-  description: string;
-  capacity_min: string;
-  capacity_max: string;
-  minimum_spend: string;
-};
+import type { ClubServiceInfo, RestaurantServiceInfo, RooftopServiceInfo, ServiceInfo } from "@/lib/venue-submissions";
 
 const VENUE_TYPES = [
   "Nightclub", "Ultra Lounge", "Lounge", "Restaurant & Bar", "Rooftop Bar",
@@ -28,10 +20,33 @@ const VIBES = [
   "Waterfront", "Fashionable",
 ];
 
-const STEPS = ["Venue Basics", "Atmosphere", "Table Service", "Contact", "Review"];
+const STEPS = ["Venue Basics", "Atmosphere", "Service Setup", "Contact", "Review"];
 
-function emptyTable(): TableDraft {
-  return { name: "", location: "", description: "", capacity_min: "", capacity_max: "", minimum_spend: "" };
+const CLUB_TYPES = new Set(["Nightclub", "Ultra Lounge", "Lounge"]);
+const RESTAURANT_TYPES = new Set(["Restaurant & Bar", "Steakhouse", "Japanese", "Mediterranean", "Omakase", "Fusion"]);
+const ROOFTOP_TYPES = new Set(["Rooftop Bar", "Beach Club", "Cocktail Bar"]);
+
+function getServiceCategory(venueType: string): "club" | "restaurant" | "rooftop" {
+  if (CLUB_TYPES.has(venueType)) return "club";
+  if (RESTAURANT_TYPES.has(venueType)) return "restaurant";
+  if (ROOFTOP_TYPES.has(venueType)) return "rooftop";
+  return "club";
+}
+
+const SPEND_STOPS = [0, 500, 1000, 1500, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 50000];
+
+function formatSpend(v: number): string {
+  if (v === 0) return "$0";
+  if (v >= 1000) return `$${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`;
+  return `$${v}`;
+}
+
+function nearestStop(v: number): number {
+  let closest = SPEND_STOPS[0];
+  for (const s of SPEND_STOPS) {
+    if (Math.abs(s - v) < Math.abs(closest - v)) closest = s;
+  }
+  return closest;
 }
 
 export default function OnboardPage() {
@@ -55,8 +70,30 @@ export default function OnboardPage() {
   const [hours, setHours] = useState("");
   const [dressCode, setDressCode] = useState("");
 
-  // Step 3: Tables
-  const [tables, setTables] = useState<TableDraft[]>([]);
+  // Step 3: Service — Club
+  const [vipTables, setVipTables] = useState("0");
+  const [standardTables, setStandardTables] = useState("0");
+  const [minSpendLow, setMinSpendLow] = useState(6);
+  const [minSpendHigh, setMinSpendHigh] = useState(10);
+  const [hasOutdoor, setHasOutdoor] = useState(false);
+  const [hasMezzanine, setHasMezzanine] = useState(false);
+  const [hasDjAdjacent, setHasDjAdjacent] = useState(false);
+  const [floorPlanUpload, setFloorPlanUpload] = useState(false);
+
+  // Step 3: Service — Restaurant
+  const [seatingCapacity, setSeatingCapacity] = useState("");
+  const [maxPartySize, setMaxPartySize] = useState("");
+  const [hasPrivateDining, setHasPrivateDining] = useState(false);
+  const [privateDiningCapacity, setPrivateDiningCapacity] = useState("");
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [hasPrixFixe, setHasPrixFixe] = useState(false);
+
+  // Step 3: Service — Rooftop
+  const [bottleTableCount, setBottleTableCount] = useState("0");
+  const [rooftopMinLow, setRooftopMinLow] = useState(4);
+  const [rooftopMinHigh, setRooftopMinHigh] = useState(8);
+  const [generalSeating, setGeneralSeating] = useState("");
+  const [sections, setSections] = useState<string[]>([]);
 
   // Step 4: Contact
   const [contactName, setContactName] = useState("");
@@ -67,20 +104,53 @@ export default function OnboardPage() {
   const [instagram, setInstagram] = useState("");
   const [notes, setNotes] = useState("");
 
+  const serviceCategory = getServiceCategory(venueType);
+
   function toggleVibe(v: string) {
     setVibe((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]);
   }
 
-  function addTable() {
-    setTables([...tables, emptyTable()]);
+  function toggleTimeSlot(s: string) {
+    setTimeSlots((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
-  function removeTable(i: number) {
-    setTables(tables.filter((_, idx) => idx !== i));
+  function toggleSection(s: string) {
+    setSections((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
-  function updateTable(i: number, field: keyof TableDraft, value: string) {
-    setTables(tables.map((t, idx) => idx === i ? { ...t, [field]: value } : t));
+  function buildServiceInfo(): ServiceInfo {
+    if (serviceCategory === "club") {
+      return {
+        category: "club",
+        vip_tables: parseInt(vipTables) || 0,
+        standard_tables: parseInt(standardTables) || 0,
+        min_spend_low: SPEND_STOPS[minSpendLow] ?? 0,
+        min_spend_high: SPEND_STOPS[minSpendHigh] ?? 0,
+        has_outdoor: hasOutdoor,
+        has_mezzanine: hasMezzanine,
+        has_dj_adjacent: hasDjAdjacent,
+        floor_plan_upload: floorPlanUpload,
+      };
+    }
+    if (serviceCategory === "restaurant") {
+      return {
+        category: "restaurant",
+        seating_capacity: parseInt(seatingCapacity) || 0,
+        max_party_size: parseInt(maxPartySize) || 0,
+        has_private_dining: hasPrivateDining,
+        private_dining_capacity: privateDiningCapacity,
+        time_slots: timeSlots,
+        has_prix_fixe: hasPrixFixe,
+      };
+    }
+    return {
+      category: "rooftop",
+      bottle_table_count: parseInt(bottleTableCount) || 0,
+      min_spend_low: SPEND_STOPS[rooftopMinLow] ?? 0,
+      min_spend_high: SPEND_STOPS[rooftopMinHigh] ?? 0,
+      general_seating: parseInt(generalSeating) || 0,
+      sections,
+    };
   }
 
   function canAdvance(): boolean {
@@ -106,16 +176,7 @@ export default function OnboardPage() {
       price_range: priceRange,
       hours,
       dress_code: dressCode,
-      tables: tables
-        .filter((t) => t.name && t.location)
-        .map((t) => ({
-          name: t.name,
-          location: t.location,
-          description: t.description,
-          capacity_min: parseInt(t.capacity_min) || 2,
-          capacity_max: parseInt(t.capacity_max) || 10,
-          minimum_spend: parseInt(t.minimum_spend) || 0,
-        })),
+      service_info: buildServiceInfo(),
       contact_name: contactName,
       contact_role: contactRole,
       contact_email: contactEmail,
@@ -264,52 +325,148 @@ export default function OnboardPage() {
           </div>
         )}
 
-        {step === 2 && (
-          <div className="flex flex-col gap-5">
-            <p className="font-sans text-sm text-nocte-muted leading-relaxed">
-              Add your table options so guests can browse and book through Noctē. You can always update these later.
+        {step === 2 && serviceCategory === "club" && (
+          <div className="flex flex-col gap-6">
+            <p className="font-sans text-xs text-nocte-muted leading-relaxed">
+              Quick setup for your table service. Our team will handle the detailed floor plan.
             </p>
 
-            {tables.map((t, i) => (
-              <div key={i} className="border border-nocte-border p-5" style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="font-sans text-[10px] text-nocte-gold tracking-[0.2em] uppercase">Table {i + 1}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeTable(i)}
-                    className="font-sans text-[10px] text-nocte-muted hover:text-red-400 tracking-[0.1em] uppercase transition-colors"
-                  >
-                    Remove
-                  </button>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Table Name" value={t.name} onChange={(v) => updateTable(i, "name", v)} placeholder="e.g. VIP Booth" compact />
-                    <Field label="Location" value={t.location} onChange={(v) => updateTable(i, "location", v)} placeholder="e.g. Main Floor" compact />
-                  </div>
-                  <Field label="Description" value={t.description} onChange={(v) => updateTable(i, "description", v)} placeholder="Brief description of the table" compact />
-                  <div className="grid grid-cols-3 gap-3">
-                    <Field label="Min Guests" value={t.capacity_min} onChange={(v) => updateTable(i, "capacity_min", v)} placeholder="2" type="number" compact />
-                    <Field label="Max Guests" value={t.capacity_max} onChange={(v) => updateTable(i, "capacity_max", v)} placeholder="10" type="number" compact />
-                    <Field label="Minimum $" value={t.minimum_spend} onChange={(v) => updateTable(i, "minimum_spend", v)} placeholder="0" type="number" compact />
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <CounterField label="VIP Tables" value={vipTables} onChange={setVipTables} />
+              <CounterField label="Standard Tables" value={standardTables} onChange={setStandardTables} />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">
+                Minimum Spend Range
+              </label>
+              <RangeSlider
+                low={minSpendLow}
+                high={minSpendHigh}
+                stops={SPEND_STOPS}
+                onLowChange={setMinSpendLow}
+                onHighChange={setMinSpendHigh}
+              />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">Features</label>
+              <div className="flex flex-col gap-2">
+                <Toggle label="Outdoor section" checked={hasOutdoor} onChange={setHasOutdoor} />
+                <Toggle label="Mezzanine / Balcony" checked={hasMezzanine} onChange={setHasMezzanine} />
+                <Toggle label="DJ-adjacent tables available" checked={hasDjAdjacent} onChange={setHasDjAdjacent} />
               </div>
-            ))}
+            </div>
 
-            <button
-              type="button"
-              onClick={addTable}
-              className="border border-dashed border-nocte-border text-nocte-muted font-sans text-[10px] tracking-[0.2em] uppercase py-4 hover:border-nocte-gold/40 hover:text-nocte-cream transition-all duration-200"
+            <div
+              className={`border border-dashed p-5 text-center transition-all duration-200 cursor-pointer ${
+                floorPlanUpload
+                  ? "border-nocte-gold bg-nocte-gold/5"
+                  : "border-nocte-border hover:border-nocte-gold/40"
+              }`}
+              onClick={() => setFloorPlanUpload(!floorPlanUpload)}
             >
-              + Add Table
-            </button>
-
-            {tables.length === 0 && (
-              <p className="font-sans text-xs text-nocte-muted/60 text-center py-4">
-                No tables yet — add your first table above, or skip this step and configure later.
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`mx-auto mb-2 ${floorPlanUpload ? "text-nocte-gold" : "text-nocte-muted"}`}>
+                <rect x="3" y="3" width="18" height="18" rx="0" />
+                <path d="M3 16l5-5 4 4 4-6 5 7" />
+              </svg>
+              <p className={`font-sans text-[10px] tracking-[0.15em] uppercase ${floorPlanUpload ? "text-nocte-gold" : "text-nocte-muted"}`}>
+                {floorPlanUpload ? "Floor plan requested" : "Request floor plan setup"}
               </p>
-            )}
+              <p className="font-sans text-[10px] text-nocte-muted/50 mt-1">
+                Our team will create your interactive floor plan
+              </p>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && serviceCategory === "restaurant" && (
+          <div className="flex flex-col gap-6">
+            <p className="font-sans text-xs text-nocte-muted leading-relaxed">
+              Tell us about your dining setup so we can match guests to the right experience.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Seating Capacity" value={seatingCapacity} onChange={setSeatingCapacity} placeholder="e.g. 120" type="number" />
+              <Field label="Largest Party Size" value={maxPartySize} onChange={setMaxPartySize} placeholder="e.g. 12" type="number" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">Private Dining</label>
+              <Toggle label="Private dining available" checked={hasPrivateDining} onChange={setHasPrivateDining} />
+              {hasPrivateDining && (
+                <div className="mt-3">
+                  <Field label="Private Dining Capacity" value={privateDiningCapacity} onChange={setPrivateDiningCapacity} placeholder="e.g. 20 guests" compact />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">Reservation Time Slots</label>
+              <div className="flex flex-wrap gap-2">
+                {["Brunch", "Lunch", "Dinner", "Late Night"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleTimeSlot(s)}
+                    className={`font-sans text-[10px] tracking-[0.1em] uppercase border px-4 py-2.5 transition-all duration-200 ${
+                      timeSlots.includes(s)
+                        ? "border-nocte-gold text-nocte-gold bg-nocte-gold/5"
+                        : "border-nocte-border text-nocte-muted hover:border-nocte-gold/40"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Toggle label="Prix fixe or special menu options" checked={hasPrixFixe} onChange={setHasPrixFixe} />
+          </div>
+        )}
+
+        {step === 2 && serviceCategory === "rooftop" && (
+          <div className="flex flex-col gap-6">
+            <p className="font-sans text-xs text-nocte-muted leading-relaxed">
+              Set up your bottle service and general seating areas.
+            </p>
+
+            <CounterField label="Bottle Service Tables" value={bottleTableCount} onChange={setBottleTableCount} />
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">
+                Bottle Service Min Spend Range
+              </label>
+              <RangeSlider
+                low={rooftopMinLow}
+                high={rooftopMinHigh}
+                stops={SPEND_STOPS}
+                onLowChange={setRooftopMinLow}
+                onHighChange={setRooftopMinHigh}
+              />
+            </div>
+
+            <Field label="General Seating Capacity" value={generalSeating} onChange={setGeneralSeating} placeholder="Non-bottle-service guests" type="number" />
+
+            <div>
+              <label className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">Sections Available</label>
+              <div className="flex flex-wrap gap-2">
+                {["Rooftop", "Indoor", "Bar Area", "Patio", "Pool Deck", "Lounge", "Garden"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleSection(s)}
+                    className={`font-sans text-[10px] tracking-[0.1em] uppercase border px-4 py-2.5 transition-all duration-200 ${
+                      sections.includes(s)
+                        ? "border-nocte-gold text-nocte-gold bg-nocte-gold/5"
+                        : "border-nocte-border text-nocte-muted hover:border-nocte-gold/40"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -343,17 +500,7 @@ export default function OnboardPage() {
               {dressCode && <ReviewRow label="Dress Code" value={dressCode} />}
             </ReviewSection>
 
-            <ReviewSection title={`Tables (${tables.filter((t) => t.name).length})`}>
-              {tables.filter((t) => t.name).length === 0 ? (
-                <p className="font-sans text-xs text-nocte-muted/60 italic">No tables configured — you can add these later.</p>
-              ) : (
-                tables.filter((t) => t.name).map((t, i) => (
-                  <div key={i} className={i > 0 ? "border-t border-nocte-border pt-2 mt-2" : ""}>
-                    <ReviewRow label={t.name} value={`${t.location} · ${t.capacity_min || 2}–${t.capacity_max || 10} guests${parseInt(t.minimum_spend) > 0 ? ` · $${parseInt(t.minimum_spend).toLocaleString()} min` : ""}`} />
-                  </div>
-                ))
-              )}
-            </ReviewSection>
+            <ServiceReview info={buildServiceInfo()} />
 
             <ReviewSection title="Contact">
               <ReviewRow label="Name" value={contactName} />
@@ -367,12 +514,10 @@ export default function OnboardPage() {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <p className="font-sans text-xs text-red-400 mt-4">{error}</p>
         )}
 
-        {/* Navigation */}
         <div className="flex gap-3 mt-8 pb-8">
           {step > 0 && (
             <button
@@ -485,6 +630,129 @@ function SelectField({ label, value, onChange, options, required }: {
   );
 }
 
+function CounterField({ label, value, onChange }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const num = parseInt(value) || 0;
+  return (
+    <div className="border border-nocte-border p-4" style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}>
+      <label className="font-sans text-[9px] text-nocte-muted tracking-[0.2em] uppercase block mb-3">{label}</label>
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => onChange(String(Math.max(0, num - 1)))}
+          className="w-10 h-10 border border-nocte-border text-nocte-muted font-sans text-lg hover:border-nocte-gold/40 hover:text-nocte-cream transition-all duration-200 flex items-center justify-center"
+        >
+          −
+        </button>
+        <span className="font-display text-2xl font-light text-nocte-cream">{num}</span>
+        <button
+          type="button"
+          onClick={() => onChange(String(num + 1))}
+          className="w-10 h-10 border border-nocte-border text-nocte-muted font-sans text-lg hover:border-nocte-gold/40 hover:text-nocte-cream transition-all duration-200 flex items-center justify-center"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RangeSlider({ low, high, stops, onLowChange, onHighChange }: {
+  low: number;
+  high: number;
+  stops: number[];
+  onLowChange: (v: number) => void;
+  onHighChange: (v: number) => void;
+}) {
+  const max = stops.length - 1;
+
+  function handleLow(v: number) {
+    onLowChange(Math.min(v, high));
+  }
+
+  function handleHigh(v: number) {
+    onHighChange(Math.max(v, low));
+  }
+
+  const leftPct = (low / max) * 100;
+  const rightPct = (high / max) * 100;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-sans text-sm text-nocte-gold">{formatSpend(stops[low])}</span>
+        <span className="font-sans text-[10px] text-nocte-muted tracking-[0.1em] uppercase">to</span>
+        <span className="font-sans text-sm text-nocte-gold">{formatSpend(stops[high])}</span>
+      </div>
+      <div className="relative h-10">
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[2px] bg-nocte-border" />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 h-[2px] bg-nocte-gold"
+          style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={max}
+          value={low}
+          onChange={(e) => handleLow(parseInt(e.target.value))}
+          className="absolute w-full h-full opacity-0 cursor-pointer"
+          style={{ zIndex: low === high ? 2 : 1 }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={max}
+          value={high}
+          onChange={(e) => handleHigh(parseInt(e.target.value))}
+          className="absolute w-full h-full opacity-0 cursor-pointer"
+          style={{ zIndex: 2 }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-nocte-gold bg-nocte-black pointer-events-none"
+          style={{ left: `calc(${leftPct}% - 8px)` }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-nocte-gold bg-nocte-black pointer-events-none"
+          style={{ left: `calc(${rightPct}% - 8px)` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({ label, checked, onChange }: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex items-center gap-3 border px-4 py-3 transition-all duration-200 text-left ${
+        checked
+          ? "border-nocte-gold/40 bg-nocte-gold/5"
+          : "border-nocte-border hover:border-nocte-gold/20"
+      }`}
+    >
+      <div className={`w-4 h-4 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+        checked ? "border-nocte-gold bg-nocte-gold" : "border-nocte-muted"
+      }`}>
+        {checked && (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#050505" strokeWidth="1.5">
+            <polyline points="2 5 4.5 7.5 8 3" />
+          </svg>
+        )}
+      </div>
+      <span className={`font-sans text-xs ${checked ? "text-nocte-cream" : "text-nocte-muted"}`}>{label}</span>
+    </button>
+  );
+}
+
 function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border border-nocte-border p-5" style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}>
@@ -500,5 +768,48 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
       <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase shrink-0">{label}</p>
       <p className="font-sans text-xs text-nocte-cream text-right">{value}</p>
     </div>
+  );
+}
+
+function ServiceReview({ info }: { info: ServiceInfo }) {
+  if (info.category === "club") {
+    const ci = info as ClubServiceInfo;
+    const features = [
+      ci.has_outdoor && "Outdoor",
+      ci.has_mezzanine && "Mezzanine",
+      ci.has_dj_adjacent && "DJ-Adjacent",
+    ].filter(Boolean);
+    return (
+      <ReviewSection title="Table Service">
+        <ReviewRow label="VIP Tables" value={String(ci.vip_tables)} />
+        <ReviewRow label="Standard Tables" value={String(ci.standard_tables)} />
+        <ReviewRow label="Min Spend Range" value={`${formatSpend(ci.min_spend_low)} – ${formatSpend(ci.min_spend_high)}`} />
+        {features.length > 0 && <ReviewRow label="Features" value={features.join(", ")} />}
+        {ci.floor_plan_upload && <ReviewRow label="Floor Plan" value="Setup requested" />}
+      </ReviewSection>
+    );
+  }
+
+  if (info.category === "restaurant") {
+    const ri = info as RestaurantServiceInfo;
+    return (
+      <ReviewSection title="Dining Setup">
+        <ReviewRow label="Seating" value={`${ri.seating_capacity} seats`} />
+        <ReviewRow label="Max Party" value={`${ri.max_party_size} guests`} />
+        <ReviewRow label="Private Dining" value={ri.has_private_dining ? `Yes — ${ri.private_dining_capacity}` : "No"} />
+        {ri.time_slots.length > 0 && <ReviewRow label="Time Slots" value={ri.time_slots.join(", ")} />}
+        <ReviewRow label="Prix Fixe" value={ri.has_prix_fixe ? "Yes" : "No"} />
+      </ReviewSection>
+    );
+  }
+
+  const rfi = info as RooftopServiceInfo;
+  return (
+    <ReviewSection title="Service Setup">
+      <ReviewRow label="Bottle Tables" value={String(rfi.bottle_table_count)} />
+      <ReviewRow label="Min Spend Range" value={`${formatSpend(rfi.min_spend_low)} – ${formatSpend(rfi.min_spend_high)}`} />
+      <ReviewRow label="General Seating" value={`${rfi.general_seating} guests`} />
+      {rfi.sections.length > 0 && <ReviewRow label="Sections" value={rfi.sections.join(", ")} />}
+    </ReviewSection>
   );
 }

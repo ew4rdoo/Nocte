@@ -98,7 +98,12 @@ export async function sendOnboardingNotification(submission: VenueSubmission) {
   }
 
   const resend = await getResend();
-  const tableCount = submission.tables.length;
+  const info = submission.service_info;
+  const serviceLabel = info.category === "club"
+    ? `${info.vip_tables} VIP + ${info.standard_tables} standard tables`
+    : info.category === "restaurant"
+    ? `${info.seating_capacity} seats, max party ${info.max_party_size}`
+    : `${info.bottle_table_count} bottle tables, ${info.general_seating} general seats`;
 
   await resend.emails.send({
     from: "Noctē Onboarding <concierge@nocte.app>",
@@ -116,7 +121,7 @@ export async function sendOnboardingNotification(submission: VenueSubmission) {
           <tr><td style="color: #6b6358; padding: 8px 0;">Address</td><td style="text-align: right; padding: 8px 0;">${submission.address}</td></tr>
           <tr><td style="color: #6b6358; padding: 8px 0;">Capacity</td><td style="text-align: right; padding: 8px 0;">${submission.capacity}</td></tr>
           <tr><td style="color: #6b6358; padding: 8px 0;">Price</td><td style="text-align: right; padding: 8px 0;">${submission.price_range}</td></tr>
-          <tr><td style="color: #6b6358; padding: 8px 0;">Tables</td><td style="text-align: right; padding: 8px 0;">${tableCount} configured</td></tr>
+          <tr><td style="color: #6b6358; padding: 8px 0;">Service</td><td style="text-align: right; padding: 8px 0;">${serviceLabel}</td></tr>
           <tr><td style="color: #6b6358; padding: 8px 0; border-top: 1px solid #1e1e1e;">Contact</td><td style="text-align: right; padding: 8px 0; border-top: 1px solid #1e1e1e;">${submission.contact_name} (${submission.contact_role})</td></tr>
           <tr><td style="color: #6b6358; padding: 8px 0;">Email</td><td style="text-align: right; padding: 8px 0;">${submission.contact_email}</td></tr>
           <tr><td style="color: #6b6358; padding: 8px 0;">Phone</td><td style="text-align: right; padding: 8px 0;">${submission.contact_phone}</td></tr>

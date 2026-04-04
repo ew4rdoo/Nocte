@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     price_range: body.price_range,
     hours: body.hours.trim(),
     dress_code: body.dress_code?.trim() || "",
-    tables: Array.isArray(body.tables) ? body.tables : [],
+    service_info: body.service_info ?? { category: "club", vip_tables: 0, standard_tables: 0, min_spend_low: 0, min_spend_high: 0, has_outdoor: false, has_mezzanine: false, has_dj_adjacent: false, floor_plan_upload: false },
     contact_name: body.contact_name.trim(),
     contact_role: body.contact_role.trim(),
     contact_email: body.contact_email.trim(),
