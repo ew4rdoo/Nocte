@@ -184,6 +184,14 @@ function BookingsTab() {
     setUpdating(null);
   }
 
+  async function deleteBooking(id: string) {
+    if (!confirm("Delete this booking permanently?")) return;
+    setUpdating(id);
+    await fetch(`/api/bookings/${id}`, { method: "DELETE" });
+    await fetchBookings();
+    setUpdating(null);
+  }
+
   function formatDate(dateStr: string) {
     return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", {
       weekday: "short",
@@ -300,6 +308,7 @@ function BookingsTab() {
                 {(b.status === "completed" || b.status === "cancelled") && (
                   <p className="font-sans text-[10px] text-nocte-muted/50 tracking-[0.1em] uppercase py-2">{b.status === "completed" ? "Night complete" : "Booking cancelled"}</p>
                 )}
+                <button onClick={() => deleteBooking(b.id)} disabled={updating === b.id} className="border border-nocte-border text-nocte-muted/40 font-sans text-[10px] tracking-[0.2em] uppercase px-3 py-2 hover:border-red-400/40 hover:text-red-400 transition-all duration-200 disabled:opacity-40">Delete</button>
               </div>
 
               <p className="font-sans text-[9px] text-nocte-muted/40 mt-3 tracking-[0.1em]">{b.id}</p>

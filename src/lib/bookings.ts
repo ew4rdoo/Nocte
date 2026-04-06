@@ -121,3 +121,12 @@ export async function updateBookingStatus(
   booking.status = status;
   return booking;
 }
+
+export async function deleteBooking(id: string): Promise<boolean> {
+  if (hasSupabase()) {
+    const supabase = await getSupabase();
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    return !error;
+  }
+  return memoryStore.delete(id);
+}

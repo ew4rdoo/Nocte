@@ -1,4 +1,4 @@
-import { getBooking, updateBookingStatus } from "@/lib/bookings";
+import { getBooking, updateBookingStatus, deleteBooking } from "@/lib/bookings";
 import type { BookingStatus } from "@/lib/bookings";
 
 export async function GET(
@@ -33,4 +33,18 @@ export async function PATCH(
   }
 
   return Response.json({ booking });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const deleted = await deleteBooking(id);
+
+  if (!deleted) {
+    return Response.json({ error: "Booking not found" }, { status: 404 });
+  }
+
+  return Response.json({ success: true });
 }
