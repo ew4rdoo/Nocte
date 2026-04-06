@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "./AuthProvider";
 
 const NAV_ITEMS = [
   {
@@ -89,8 +90,16 @@ const NAV_ITEMS = [
   },
 ];
 
+const PROFILE_ICON = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M4 21c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <nav
@@ -144,6 +153,25 @@ export default function BottomNav() {
             </Link>
           );
         })}
+
+        {/* Profile / Sign In */}
+        <Link
+          href={user ? "/profile" : "/auth/sign-in"}
+          className={`flex flex-col items-center gap-1 flex-1 py-2 transition-all duration-200 ${
+            pathname.startsWith("/profile") || pathname.startsWith("/auth")
+              ? "text-nocte-gold"
+              : "text-nocte-muted"
+          }`}
+        >
+          <span className={`transition-transform duration-200 ${pathname.startsWith("/profile") || pathname.startsWith("/auth") ? "scale-110" : "scale-100"}`}>
+            {PROFILE_ICON}
+          </span>
+          <span className={`font-sans text-[9px] tracking-[0.12em] uppercase transition-all duration-200 ${
+            pathname.startsWith("/profile") || pathname.startsWith("/auth") ? "text-nocte-gold" : "text-nocte-muted/70"
+          }`}>
+            {user ? "Profile" : "Sign In"}
+          </span>
+        </Link>
       </div>
     </nav>
   );
