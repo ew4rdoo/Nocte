@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/app/_components/AuthProvider";
+import { useRouter } from "next/navigation";
+
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "edwardboss454@gmail.com").split(",").map((e) => e.trim().toLowerCase());
 
 type Booking = {
   id: string;
@@ -82,6 +86,33 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("bookings");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth/sign-in?redirect=/admin");
+    }
+    if (!loading && user && !ADMIN_EMAILS.includes(user.email?.toLowerCase() || "")) {
+      router.push("/");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-nocte-black text-nocte-cream flex items-center justify-center">
+        <div className="flex gap-1">
+          <div className="w-2 h-2 bg-nocte-gold animate-bounce" style={{ animationDelay: "0ms" }} />
+          <div className="w-2 h-2 bg-nocte-gold animate-bounce" style={{ animationDelay: "150ms" }} />
+          <div className="w-2 h-2 bg-nocte-gold animate-bounce" style={{ animationDelay: "300ms" }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase() || "")) {
+    return null;
+  }
 
   return (
     <div
