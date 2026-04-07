@@ -31,7 +31,7 @@ export default async function VenueDetailPage({
       {/* Hero */}
       <div
         className="relative overflow-hidden"
-        style={{ background: venue.gradient || "linear-gradient(160deg, #0e0e0e 0%, #050505 100%)", aspectRatio: "4/5" }}
+        style={{ background: venue.gradient || "linear-gradient(160deg, #0e0e0e 0%, #050505 100%)", height: "320px" }}
       >
         {/* Venue image */}
         {venue.imageUrl && (
@@ -45,12 +45,12 @@ export default async function VenueDetailPage({
           />
         )}
         {/* Dark gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-nocte-black via-black/60 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-nocte-black via-black/50 to-black/20" />
 
         {/* Back button */}
         <Link
           href="/discover"
-          className="absolute top-16 left-6 flex items-center gap-2 font-sans text-[10px] tracking-[0.2em] uppercase text-nocte-muted hover:text-nocte-cream transition-colors duration-200"
+          className="absolute top-14 left-6 flex items-center gap-2 font-sans text-[10px] tracking-[0.2em] uppercase text-nocte-muted hover:text-nocte-cream transition-colors duration-200 z-10"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path
@@ -66,7 +66,7 @@ export default async function VenueDetailPage({
 
         {/* Live indicator */}
         {venue.hot && (
-          <div className="absolute top-16 right-6 flex items-center gap-1.5">
+          <div className="absolute top-14 right-6 flex items-center gap-1.5 z-10">
             <span className="w-1.5 h-1.5 rounded-full bg-nocte-gold animate-pulse" />
             <span className="font-sans text-[10px] tracking-[0.2em] text-nocte-muted uppercase">
               Hot Tonight
@@ -80,12 +80,12 @@ export default async function VenueDetailPage({
             {venue.type}&nbsp;·&nbsp;{venue.neighborhood}
           </p>
           <h1
-            className="font-display font-light text-nocte-cream tracking-[0.2em] leading-none mb-2"
-            style={{ fontSize: "clamp(3rem, 16vw, 4.5rem)" }}
+            className="font-display font-light text-nocte-cream tracking-[0.15em] leading-none mb-1"
+            style={{ fontSize: "clamp(2.2rem, 12vw, 3.5rem)" }}
           >
             {venue.name}
           </h1>
-          <p className="font-sans text-sm text-nocte-muted">{venue.hours}</p>
+          <p className="font-sans text-xs text-nocte-muted">{venue.hours}</p>
         </div>
       </div>
 
