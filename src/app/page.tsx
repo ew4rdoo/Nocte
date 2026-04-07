@@ -4,10 +4,8 @@ import { getActiveVenues, getHotVenues } from "@/lib/venues";
 const SERVICES = [
   { id: "dining", name: "Dining", icon: "🍽", href: "/concierge?message=I%20need%20a%20reservation%20at%20a%20top%20Miami%20restaurant" },
   { id: "vip", name: "VIP Tables", icon: "✦", href: "/concierge?message=I%20want%20VIP%20tables%20and%20bottle%20service%20tonight" },
-  { id: "yacht", name: "Yachts", icon: "⛵", href: "/concierge?message=I%27d%20like%20to%20charter%20a%20yacht%20in%20Miami" },
-  { id: "hotel", name: "Hotels", icon: "🏨", href: "/concierge?message=I%20need%20a%20luxury%20hotel%20suite%20in%20Miami" },
-  { id: "car", name: "Exotic Cars", icon: "🏎", href: "/concierge?message=I%20want%20to%20rent%20an%20exotic%20car%20in%20Miami" },
-  { id: "jet", name: "Private Jets", icon: "✈", href: "/concierge?message=I%20need%20to%20arrange%20a%20private%20jet" },
+  { id: "guestlist", name: "Guest Lists", icon: "📋", href: "/concierge?message=Can%20you%20get%20me%20on%20the%20guest%20list%20tonight" },
+  { id: "group", name: "Group Plans", icon: "👥", href: "/concierge?message=I%27m%20planning%20a%20group%20night%20out%20in%20Miami" },
 ];
 
 export default async function HomePage() {
