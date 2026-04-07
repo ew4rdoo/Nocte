@@ -1,5 +1,5 @@
 import { createBooking, listBookings } from "@/lib/bookings";
-import { getVenueById } from "@/lib/venues";
+import { getVenueByIdAsync } from "@/lib/venues";
 import { sendBookingNotifications } from "@/lib/email";
 
 export async function GET(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const venue = getVenueById(venueId);
+  const venue = await getVenueByIdAsync(venueId);
   if (!venue) {
     return Response.json({ error: "Venue not found" }, { status: 404 });
   }

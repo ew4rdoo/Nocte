@@ -71,7 +71,18 @@ type VenueSubmission = {
   created_at: string;
 };
 
-type Tab = "bookings" | "partners" | "onboarding";
+type AdminVenue = {
+  id: string;
+  name: string;
+  type: string;
+  neighborhood: string;
+  category?: string;
+  hot?: boolean;
+  active?: boolean;
+  priceRange: string;
+};
+
+type Tab = "bookings" | "partners" | "onboarding" | "venues";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "text-yellow-400 border-yellow-400/30",
@@ -128,7 +139,7 @@ export default function AdminPage() {
           Admin
         </h1>
         <div className="flex gap-0">
-          {(["bookings", "partners", "onboarding"] as const).map((t) => (
+          {(["bookings", "partners", "onboarding", "venues"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -147,6 +158,7 @@ export default function AdminPage() {
       {tab === "bookings" && <BookingsTab />}
       {tab === "partners" && <PartnersTab />}
       {tab === "onboarding" && <OnboardingTab />}
+      {tab === "venues" && <VenuesTab />}
     </div>
   );
 }
@@ -718,6 +730,119 @@ function OnboardingTab() {
               </div>
 
               <p className="font-sans text-[9px] text-nocte-muted/40 mt-3 tracking-[0.1em]">{s.id}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Venues Tab ───
+
+function VenuesTab() {
+  const [venues, setVenues] = useState<AdminVenue[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const fetchVenues = useCallback(async () => {
+    const res = await fetch("/api/venues?admin=true");
+    const data = await res.json();
+    setVenues(data.venues || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchVenues();
+  }, [fetchVenues]);
+
+  async function toggleActive(id: string, currentActive: boolean) {
+    setUpdating(id);
+    await fetch(`/api/venues/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: !currentActive }),
+    });
+    await fetchVenues();
+    setUpdating(null);
+  }
+
+  async function deleteVenue(id: string) {
+    if (!confirm("Delete this venue permanently? This cannot be undone.")) return;
+    setUpdating(id);
+    await fetch(`/api/venues/${id}`, { method: "DELETE" });
+    await fetchVenues();
+    setUpdating(null);
+  }
+
+  return (
+    <>
+      <div className="px-6 py-4">
+        <p className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase">
+          {loading ? "Loading…" : `${venues.length} venue${venues.length !== 1 ? "s" : ""}`}
+        </p>
+      </div>
+
+      {!loading && venues.length === 0 ? (
+        <div className="px-6 py-20 text-center">
+          <p className="font-display text-2xl font-light text-nocte-cream italic mb-2">No venues yet</p>
+          <p className="font-sans text-xs text-nocte-muted">Venues will appear here once added or approved from submissions.</p>
+        </div>
+      ) : (
+        <div className="px-6 flex flex-col gap-3">
+          {venues.map((v) => (
+            <div
+              key={v.id}
+              className="border border-nocte-border p-5"
+              style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-display text-lg font-light text-nocte-cream tracking-wide">{v.name}</p>
+                  <p className="font-sans text-[10px] text-nocte-muted tracking-[0.1em] uppercase">{v.type} · {v.neighborhood}</p>
+                </div>
+                <span className={`font-sans text-[9px] tracking-[0.2em] uppercase border px-2 py-1 ${
+                  v.active !== false
+                    ? "text-green-400 border-green-400/30"
+                    : "text-red-400 border-red-400/30"
+                }`}>
+                  {v.active !== false ? "active" : "inactive"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Category</p>
+                  <p className="font-sans text-xs text-nocte-cream">{v.category || "—"}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-[9px] text-nocte-muted tracking-[0.1em] uppercase">Price</p>
+                  <p className="font-sans text-xs text-nocte-cream">{v.priceRange}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-nocte-border">
+                <button
+                  onClick={() => toggleActive(v.id, v.active !== false)}
+                  disabled={updating === v.id}
+                  className={`flex-1 border font-sans text-[10px] tracking-[0.2em] uppercase py-2 transition-all duration-200 disabled:opacity-40 ${
+                    v.active !== false
+                      ? "border-nocte-border text-nocte-muted hover:border-red-400/40 hover:text-red-400"
+                      : "border-nocte-gold text-nocte-gold hover:bg-nocte-gold hover:text-nocte-black"
+                  }`}
+                >
+                  {v.active !== false ? "Deactivate" : "Activate"}
+                </button>
+                <button
+                  onClick={() => deleteVenue(v.id)}
+                  disabled={updating === v.id}
+                  className="border border-nocte-border text-nocte-muted/40 font-sans text-[10px] tracking-[0.2em] uppercase px-3 py-2 hover:border-red-400/40 hover:text-red-400 transition-all duration-200 disabled:opacity-40"
+                >
+                  Delete
+                </button>
+              </div>
+
+              <p className="font-sans text-[9px] text-nocte-muted/40 mt-3 tracking-[0.1em]">{v.id}</p>
             </div>
           ))}
         </div>

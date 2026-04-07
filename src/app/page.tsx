@@ -1,13 +1,5 @@
 import Link from "next/link";
-import { VENUES } from "@/lib/venues";
-
-const NEIGHBORHOODS = [
-  { name: "South Beach", tagline: "The iconic strip", count: VENUES.filter((v) => v.neighborhood === "South Beach").length },
-  { name: "Brickell", tagline: "The power district", count: VENUES.filter((v) => v.neighborhood === "Brickell").length },
-  { name: "Downtown", tagline: "After hours capital", count: VENUES.filter((v) => v.neighborhood === "Downtown").length },
-  { name: "Design District", tagline: "Where culture meets nightlife", count: VENUES.filter((v) => v.neighborhood === "Design District").length },
-  { name: "Wynwood", tagline: "Art & cocktails", count: VENUES.filter((v) => v.neighborhood === "Wynwood").length },
-];
+import { getActiveVenues, getHotVenues } from "@/lib/venues";
 
 const SERVICES = [
   {
@@ -112,9 +104,20 @@ const SERVICES = [
   },
 ];
 
-const hotVenues = VENUES.filter((v) => v.hot);
+export default async function HomePage() {
+  const [allVenues, hotVenues] = await Promise.all([
+    getActiveVenues(),
+    getHotVenues(),
+  ]);
 
-export default function HomePage() {
+  const NEIGHBORHOODS = [
+    { name: "South Beach", tagline: "The iconic strip", count: allVenues.filter((v) => v.neighborhood === "South Beach").length },
+    { name: "Brickell", tagline: "The power district", count: allVenues.filter((v) => v.neighborhood === "Brickell").length },
+    { name: "Downtown", tagline: "After hours capital", count: allVenues.filter((v) => v.neighborhood === "Downtown").length },
+    { name: "Design District", tagline: "Where culture meets nightlife", count: allVenues.filter((v) => v.neighborhood === "Design District").length },
+    { name: "Wynwood", tagline: "Art & cocktails", count: allVenues.filter((v) => v.neighborhood === "Wynwood").length },
+  ];
+
   return (
     <div
       className="min-h-screen bg-nocte-black text-nocte-cream"

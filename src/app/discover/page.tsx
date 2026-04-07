@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { VENUES } from "@/lib/venues";
 import VenueCardSkeleton from "@/app/_components/VenueCardSkeleton";
+import type { Venue } from "@/lib/venues";
 
 const TYPE_FILTERS = ["All", "Nightclub", "Lounge", "Restaurant & Bar", "Ultra Lounge", "Omakase", "Steakhouse", "Bar"];
 const VIBE_FILTERS = ["All", "Wild", "Electric", "Upscale", "Intimate", "Chill", "Trendy", "Celebrity", "24-Hour"];
@@ -14,21 +14,26 @@ const SKELETON_COUNT = 6;
 
 export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
+  const [venues, setVenues] = useState<Venue[]>([]);
   const [activeType, setActiveType] = useState("All");
   const [activeVibe, setActiveVibe] = useState("All");
   const [activePrice, setActivePrice] = useState("All");
   const [activeNeighborhood, setActiveNeighborhood] = useState("All");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
+    fetch("/api/venues")
+      .then((res) => res.json())
+      .then((data) => {
+        setVenues(data.venues || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
 
-  const filtered = VENUES.filter((v) => {
+  const filtered = venues.filter((v) => {
     if (activeType !== "All" && v.type !== activeType) return false;
     if (activeVibe !== "All" && !v.vibe.includes(activeVibe)) return false;
     if (activePrice !== "All" && v.priceRange !== activePrice) return false;

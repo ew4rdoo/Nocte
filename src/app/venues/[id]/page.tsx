@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getVenueById, VENUES } from "@/lib/venues";
+import { getVenueByIdAsync, getActiveVenues } from "@/lib/venues";
+
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return VENUES.map((v) => ({ id: v.id }));
+  const venues = await getActiveVenues();
+  return venues.map((v) => ({ id: v.id }));
 }
 
 export default async function VenueDetailPage({
@@ -12,7 +15,7 @@ export default async function VenueDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const venue = getVenueById(id);
+  const venue = await getVenueByIdAsync(id);
 
   if (!venue) notFound();
 

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { formatVenuesForPrompt, VENUES, getVenueById } from "@/lib/venues";
+import { formatVenuesForPromptAsync, getActiveVenues, getVenueByIdAsync } from "@/lib/venues";
 import type { MessageParam, Tool, ToolResultBlockParam } from "@anthropic-ai/sdk/resources/messages";
 
 const TOOLS: Tool[] = [
@@ -68,7 +68,7 @@ const TOOLS: Tool[] = [
   },
 ];
 
-function executeSearchVenues(input: {
+async function executeSearchVenues(input: {
   vibe?: string;
   neighborhood?: string;
   category?: string;
@@ -78,7 +78,8 @@ function executeSearchVenues(input: {
   const priceOrder = ["$", "$$", "$$$", "$$$$"];
   const maxPriceIndex = input.max_price ? priceOrder.indexOf(input.max_price) : 3;
 
-  const results = VENUES.filter((v) => {
+  const allVenues = await getActiveVenues();
+  const results = allVenues.filter((v) => {
     if (input.neighborhood && !v.neighborhood.toLowerCase().includes(input.neighborhood.toLowerCase())) return false;
     if (input.category && v.category !== input.category) return false;
     if (input.max_price && priceOrder.indexOf(v.priceRange) > maxPriceIndex) return false;
@@ -109,8 +110,8 @@ function executeSearchVenues(input: {
   }));
 }
 
-function executeGetVenueTables(input: { venue_id: string }) {
-  const venue = getVenueById(input.venue_id);
+async function executeGetVenueTables(input: { venue_id: string }) {
+  const venue = await getVenueByIdAsync(input.venue_id);
   if (!venue) return { error: "Venue not found" };
 
   return {
@@ -130,8 +131,8 @@ function executeGetVenueTables(input: { venue_id: string }) {
   };
 }
 
-function executeCreateBookingLink(input: { venue_id: string }) {
-  const venue = getVenueById(input.venue_id);
+async function executeCreateBookingLink(input: { venue_id: string }) {
+  const venue = await getVenueByIdAsync(input.venue_id);
   if (!venue) return { error: "Venue not found" };
 
   const hasTables = venue.tables && venue.tables.length > 0;
@@ -145,7 +146,7 @@ function executeCreateBookingLink(input: { venue_id: string }) {
   };
 }
 
-function executeTool(name: string, input: Record<string, unknown>) {
+async function executeTool(name: string, input: Record<string, unknown>) {
   switch (name) {
     case "search_venues":
       return executeSearchVenues(input as Parameters<typeof executeSearchVenues>[0]);
@@ -158,7 +159,8 @@ function executeTool(name: string, input: Record<string, unknown>) {
   }
 }
 
-function buildSystemPrompt(): string {
+async function buildSystemPrompt(): Promise<string> {
+  const venuePrompt = await formatVenuesForPromptAsync();
   return `You are Noctē — the personal concierge for Miami's most discerning nightlife experiences. You are not a chatbot. You are a trusted, well-connected friend who knows every room, every host, and every table in the city.
 
 Your personality:
@@ -177,7 +179,7 @@ Your role:
 
 ## Venue Directory
 
-${formatVenuesForPrompt()}
+${venuePrompt}
 
 ## Tools
 
@@ -216,6 +218,7 @@ export async function POST(request: Request) {
 
     const client = new Anthropic();
     const encoder = new TextEncoder();
+    const systemPrompt = await buildSystemPrompt();
 
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -230,7 +233,7 @@ export async function POST(request: Request) {
             const stream = client.messages.stream({
               model: "claude-opus-4-6",
               max_tokens: 300,
-              system: buildSystemPrompt(),
+              system: systemPrompt,
               messages: currentMessages,
               tools: TOOLS,
             });
@@ -279,7 +282,7 @@ export async function POST(request: Request) {
             const toolResults: ToolResultBlockParam[] = [];
             for (const block of toolUseBlocks) {
               const input = JSON.parse(block.input || "{}");
-              const result = executeTool(block.name, input);
+              const result = await executeTool(block.name, input);
 
               // Send structured data to client for rendering
               if (block.name === "search_venues" && Array.isArray(result)) {
@@ -289,8 +292,8 @@ export async function POST(request: Request) {
                   );
                 }
               } else if (block.name === "create_booking_link") {
-                const linkResult = result as ReturnType<typeof executeCreateBookingLink>;
-                if (linkResult.booking_url) {
+                const linkResult = result as Awaited<ReturnType<typeof executeCreateBookingLink>>;
+                if ("booking_url" in linkResult && linkResult.booking_url) {
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({
                       type: "booking_link",

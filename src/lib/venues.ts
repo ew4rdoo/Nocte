@@ -33,7 +33,7 @@ export type Venue = {
   tables?: TableOption[];
 };
 
-export const VENUES: Venue[] = [
+const VENUES_FALLBACK: Venue[] = [
   {
     id: "liv",
     name: "LIV",
@@ -522,18 +522,22 @@ export const VENUES: Venue[] = [
   },
 ];
 
+// Backward-compatible export
+export const VENUES: Venue[] = VENUES_FALLBACK;
+
+// Sync helpers (kept for backward compatibility)
 export function getVenueById(id: string): Venue | undefined {
-  return VENUES.find((v) => v.id === id);
+  return VENUES_FALLBACK.find((v) => v.id === id);
 }
 
 export function getVenuesByNeighborhood(neighborhood: string): Venue[] {
-  return VENUES.filter((v) =>
+  return VENUES_FALLBACK.filter((v) =>
     v.neighborhood.toLowerCase().includes(neighborhood.toLowerCase())
   );
 }
 
 export function getVenuesByCategory(category: Venue["category"]): Venue[] {
-  return VENUES.filter((v) => v.category === category);
+  return VENUES_FALLBACK.filter((v) => v.category === category);
 }
 
 export function getTablesForVenue(venueId: string): TableOption[] {
@@ -542,7 +546,7 @@ export function getTablesForVenue(venueId: string): TableOption[] {
 }
 
 export function formatVenuesForPrompt(): string {
-  return VENUES.map((v) => {
+  return VENUES_FALLBACK.map((v) => {
     const lines = [
       `### ${v.name} (${v.id})`,
       `Category: ${v.category} | Neighborhood: ${v.neighborhood} | Price: ${v.priceRange}`,
@@ -558,4 +562,434 @@ export function formatVenuesForPrompt(): string {
     if (v.notes) lines.push(`Notes: ${v.notes}`);
     return lines.join("\n");
   }).join("\n\n");
+}
+
+// ─── Supabase helpers ───
+
+function hasSupabase(): boolean {
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function getSupabase() {
+  const { supabase } = await import("./supabase");
+  return supabase;
+}
+
+type VenueRow = {
+  id: string;
+  name: string;
+  category: string | null;
+  type: string;
+  neighborhood: string;
+  address: string;
+  gradient: string;
+  description: string;
+  vibe: string;
+  price_range: string;
+  hours: string;
+  dress_code: string | null;
+  minimums: string | null;
+  bottle_service_range: string | null;
+  best_for: string;
+  notes: string | null;
+  bottle_min: number;
+  table_capacity: string;
+  phone: string;
+  reviews: string;
+  hot: boolean;
+  active: boolean;
+  submission_id: string | null;
+};
+
+type TableRow = {
+  id: string;
+  venue_id: string;
+  name: string;
+  description: string;
+  location: string;
+  capacity_min: number;
+  capacity_max: number;
+  minimum_spend: number;
+  available: boolean;
+  sort_order: number;
+};
+
+function parseJsonField<T>(value: unknown, fallback: T): T {
+  if (typeof value === "string") {
+    try { return JSON.parse(value); } catch { return fallback; }
+  }
+  if (Array.isArray(value)) return value as T;
+  return fallback;
+}
+
+function tableRowToOption(row: TableRow): TableOption {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    location: row.location,
+    capacity: { min: row.capacity_min, max: row.capacity_max },
+    minimumSpend: row.minimum_spend,
+    available: row.available,
+  };
+}
+
+function rowToVenue(row: VenueRow, tableRows: TableRow[]): Venue {
+  return {
+    id: row.id,
+    name: row.name,
+    category: (row.category || undefined) as Venue["category"],
+    type: row.type,
+    neighborhood: row.neighborhood,
+    address: row.address,
+    gradient: row.gradient,
+    description: row.description,
+    vibe: parseJsonField<string[]>(row.vibe, []),
+    priceRange: row.price_range as Venue["priceRange"],
+    hours: row.hours,
+    dressCode: row.dress_code || undefined,
+    minimums: row.minimums || undefined,
+    bottleServiceRange: row.bottle_service_range || undefined,
+    bestFor: parseJsonField<string[]>(row.best_for, []),
+    notes: row.notes || undefined,
+    bottleMin: row.bottle_min,
+    tableCapacity: row.table_capacity,
+    phone: row.phone,
+    reviews: parseJsonField<{ author: string; text: string; rating: number }[]>(row.reviews, []),
+    hot: row.hot,
+    tables: tableRows
+      .filter((t) => t.venue_id === row.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(tableRowToOption),
+  };
+}
+
+// ─── Async data functions ───
+
+export async function getActiveVenues(): Promise<Venue[]> {
+  if (!hasSupabase()) return VENUES_FALLBACK;
+
+  const supabase = await getSupabase();
+  const { data: venueRows, error } = await supabase
+    .from("venues")
+    .select("*")
+    .eq("active", true)
+    .order("name");
+
+  if (error || !venueRows) return VENUES_FALLBACK;
+
+  const venueIds = venueRows.map((v: VenueRow) => v.id);
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .in("venue_id", venueIds)
+    .order("sort_order");
+
+  return venueRows.map((row: VenueRow) =>
+    rowToVenue(row, (tableRows ?? []) as TableRow[])
+  );
+}
+
+export async function getVenueByIdAsync(id: string): Promise<Venue | undefined> {
+  if (!hasSupabase()) return VENUES_FALLBACK.find((v) => v.id === id);
+
+  const supabase = await getSupabase();
+  const { data: row, error } = await supabase
+    .from("venues")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !row) return VENUES_FALLBACK.find((v) => v.id === id);
+
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .eq("venue_id", id)
+    .order("sort_order");
+
+  return rowToVenue(row as VenueRow, (tableRows ?? []) as TableRow[]);
+}
+
+export async function getHotVenues(): Promise<Venue[]> {
+  if (!hasSupabase()) return VENUES_FALLBACK.filter((v) => v.hot);
+
+  const supabase = await getSupabase();
+  const { data: venueRows, error } = await supabase
+    .from("venues")
+    .select("*")
+    .eq("active", true)
+    .eq("hot", true)
+    .order("name");
+
+  if (error || !venueRows) return VENUES_FALLBACK.filter((v) => v.hot);
+
+  const venueIds = venueRows.map((v: VenueRow) => v.id);
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .in("venue_id", venueIds)
+    .order("sort_order");
+
+  return venueRows.map((row: VenueRow) =>
+    rowToVenue(row, (tableRows ?? []) as TableRow[])
+  );
+}
+
+export async function getVenuesByNeighborhoodAsync(neighborhood: string): Promise<Venue[]> {
+  if (!hasSupabase()) {
+    return VENUES_FALLBACK.filter((v) =>
+      v.neighborhood.toLowerCase().includes(neighborhood.toLowerCase())
+    );
+  }
+
+  const supabase = await getSupabase();
+  const { data: venueRows, error } = await supabase
+    .from("venues")
+    .select("*")
+    .eq("active", true)
+    .ilike("neighborhood", `%${neighborhood}%`)
+    .order("name");
+
+  if (error || !venueRows) {
+    return VENUES_FALLBACK.filter((v) =>
+      v.neighborhood.toLowerCase().includes(neighborhood.toLowerCase())
+    );
+  }
+
+  const venueIds = venueRows.map((v: VenueRow) => v.id);
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .in("venue_id", venueIds)
+    .order("sort_order");
+
+  return venueRows.map((row: VenueRow) =>
+    rowToVenue(row, (tableRows ?? []) as TableRow[])
+  );
+}
+
+export async function getVenuesByCategoryAsync(category: string): Promise<Venue[]> {
+  if (!hasSupabase()) return VENUES_FALLBACK.filter((v) => v.category === category);
+
+  const supabase = await getSupabase();
+  const { data: venueRows, error } = await supabase
+    .from("venues")
+    .select("*")
+    .eq("active", true)
+    .eq("category", category)
+    .order("name");
+
+  if (error || !venueRows) return VENUES_FALLBACK.filter((v) => v.category === category);
+
+  const venueIds = venueRows.map((v: VenueRow) => v.id);
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .in("venue_id", venueIds)
+    .order("sort_order");
+
+  return venueRows.map((row: VenueRow) =>
+    rowToVenue(row, (tableRows ?? []) as TableRow[])
+  );
+}
+
+export async function getTablesForVenueAsync(venueId: string): Promise<TableOption[]> {
+  if (!hasSupabase()) {
+    const venue = VENUES_FALLBACK.find((v) => v.id === venueId);
+    return venue?.tables ?? [];
+  }
+
+  const supabase = await getSupabase();
+  const { data: tableRows, error } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .eq("venue_id", venueId)
+    .order("sort_order");
+
+  if (error || !tableRows) {
+    const venue = VENUES_FALLBACK.find((v) => v.id === venueId);
+    return venue?.tables ?? [];
+  }
+
+  return (tableRows as TableRow[]).map(tableRowToOption);
+}
+
+export async function formatVenuesForPromptAsync(): Promise<string> {
+  const venues = await getActiveVenues();
+  return venues.map((v) => {
+    const lines = [
+      `### ${v.name} (${v.id})`,
+      `Category: ${v.category} | Neighborhood: ${v.neighborhood} | Price: ${v.priceRange}`,
+      `Address: ${v.address}`,
+      `Hours: ${v.hours}`,
+      `Description: ${v.description}`,
+      `Vibe: ${v.vibe.join(", ")}`,
+      `Best for: ${(v.bestFor || []).join(", ")}`,
+    ];
+    if (v.dressCode) lines.push(`Dress code: ${v.dressCode}`);
+    if (v.minimums) lines.push(`Minimums: ${v.minimums}`);
+    if (v.bottleServiceRange) lines.push(`Bottle service: ${v.bottleServiceRange}`);
+    if (v.notes) lines.push(`Notes: ${v.notes}`);
+    return lines.join("\n");
+  }).join("\n\n");
+}
+
+export async function createVenue(
+  data: Omit<Venue, "tables"> & { tables?: TableOption[] }
+): Promise<Venue> {
+  const tables = data.tables ?? [];
+
+  if (hasSupabase()) {
+    const supabase = await getSupabase();
+    const { error } = await supabase.from("venues").insert({
+      id: data.id,
+      name: data.name,
+      category: data.category || null,
+      type: data.type,
+      neighborhood: data.neighborhood,
+      address: data.address,
+      gradient: data.gradient,
+      description: data.description,
+      vibe: JSON.stringify(data.vibe),
+      price_range: data.priceRange,
+      hours: data.hours,
+      dress_code: data.dressCode || null,
+      minimums: data.minimums || null,
+      bottle_service_range: data.bottleServiceRange || null,
+      best_for: JSON.stringify(data.bestFor || []),
+      notes: data.notes || null,
+      bottle_min: data.bottleMin,
+      table_capacity: data.tableCapacity,
+      phone: data.phone,
+      reviews: JSON.stringify(data.reviews),
+      hot: data.hot || false,
+      active: true,
+      submission_id: null,
+    });
+    if (error) throw new Error(`Failed to create venue: ${error.message}`);
+
+    if (tables.length > 0) {
+      const tableInserts = tables.map((t, i) => ({
+        id: t.id,
+        venue_id: data.id,
+        name: t.name,
+        description: t.description,
+        location: t.location,
+        capacity_min: t.capacity.min,
+        capacity_max: t.capacity.max,
+        minimum_spend: t.minimumSpend,
+        available: t.available,
+        sort_order: i,
+      }));
+      const { error: tableError } = await supabase.from("venue_tables").insert(tableInserts);
+      if (tableError) throw new Error(`Failed to create venue tables: ${tableError.message}`);
+    }
+  }
+
+  return { ...data, tables };
+}
+
+export async function updateVenue(
+  id: string,
+  updates: Partial<{
+    name: string;
+    category: string;
+    type: string;
+    neighborhood: string;
+    address: string;
+    gradient: string;
+    description: string;
+    vibe: string[];
+    priceRange: string;
+    hours: string;
+    dressCode: string;
+    minimums: string;
+    bottleServiceRange: string;
+    bestFor: string[];
+    notes: string;
+    bottleMin: number;
+    tableCapacity: string;
+    phone: string;
+    reviews: { author: string; text: string; rating: number }[];
+    hot: boolean;
+    active: boolean;
+  }>
+): Promise<Venue | null> {
+  if (!hasSupabase()) return null;
+
+  const supabase = await getSupabase();
+  const dbUpdates: Record<string, unknown> = {};
+
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.category !== undefined) dbUpdates.category = updates.category;
+  if (updates.type !== undefined) dbUpdates.type = updates.type;
+  if (updates.neighborhood !== undefined) dbUpdates.neighborhood = updates.neighborhood;
+  if (updates.address !== undefined) dbUpdates.address = updates.address;
+  if (updates.gradient !== undefined) dbUpdates.gradient = updates.gradient;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.vibe !== undefined) dbUpdates.vibe = JSON.stringify(updates.vibe);
+  if (updates.priceRange !== undefined) dbUpdates.price_range = updates.priceRange;
+  if (updates.hours !== undefined) dbUpdates.hours = updates.hours;
+  if (updates.dressCode !== undefined) dbUpdates.dress_code = updates.dressCode;
+  if (updates.minimums !== undefined) dbUpdates.minimums = updates.minimums;
+  if (updates.bottleServiceRange !== undefined) dbUpdates.bottle_service_range = updates.bottleServiceRange;
+  if (updates.bestFor !== undefined) dbUpdates.best_for = JSON.stringify(updates.bestFor);
+  if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+  if (updates.bottleMin !== undefined) dbUpdates.bottle_min = updates.bottleMin;
+  if (updates.tableCapacity !== undefined) dbUpdates.table_capacity = updates.tableCapacity;
+  if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+  if (updates.reviews !== undefined) dbUpdates.reviews = JSON.stringify(updates.reviews);
+  if (updates.hot !== undefined) dbUpdates.hot = updates.hot;
+  if (updates.active !== undefined) dbUpdates.active = updates.active;
+
+  dbUpdates.updated_at = new Date().toISOString();
+
+  const { data: row, error } = await supabase
+    .from("venues")
+    .update(dbUpdates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !row) return null;
+
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .eq("venue_id", id)
+    .order("sort_order");
+
+  return rowToVenue(row as VenueRow, (tableRows ?? []) as TableRow[]);
+}
+
+export async function deleteVenue(id: string): Promise<boolean> {
+  if (!hasSupabase()) return false;
+
+  const supabase = await getSupabase();
+  const { error } = await supabase.from("venues").delete().eq("id", id);
+  return !error;
+}
+
+export async function getAllVenuesAdmin(): Promise<Venue[]> {
+  if (!hasSupabase()) return VENUES_FALLBACK;
+
+  const supabase = await getSupabase();
+  const { data: venueRows, error } = await supabase
+    .from("venues")
+    .select("*")
+    .order("name");
+
+  if (error || !venueRows) return VENUES_FALLBACK;
+
+  const venueIds = venueRows.map((v: VenueRow) => v.id);
+  const { data: tableRows } = await supabase
+    .from("venue_tables")
+    .select("*")
+    .in("venue_id", venueIds)
+    .order("sort_order");
+
+  return venueRows.map((row: VenueRow) =>
+    rowToVenue(row, (tableRows ?? []) as TableRow[])
+  );
 }
