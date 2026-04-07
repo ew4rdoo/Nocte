@@ -74,20 +74,6 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    href: "/lifestyle",
-    label: "Lifestyle",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M12 2l2.5 7H22l-6 4.5 2.5 7L12 17l-6.5 3.5L8 13.5 2 9h7.5L12 2z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
 ];
 
 const PROFILE_ICON = (
