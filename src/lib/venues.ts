@@ -145,7 +145,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "4–8 guests",
     phone: "",
     reviews: [],
-    imageUrl: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&q=80",
     tables: [
       { id: "cs-terrace", name: "Terrace Table", description: "The legendary terrace — sunrise sessions happen here", location: "Terrace", capacity: { min: 4, max: 8 }, minimumSpend: 1000, available: true },
       { id: "cs-main", name: "Main Room Table", description: "Inside the main room near the booth", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1500, available: true },
@@ -184,7 +184,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
-    imageUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80",
     tables: [
       { id: "komodo-dining", name: "Dining Table", description: "Main dining room with views of the open kitchen", location: "Dining Room", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
       { id: "komodo-rooftop", name: "Rooftop Table", description: "Third-floor open-air rooftop — the scene on weekends", location: "Rooftop", capacity: { min: 4, max: 8 }, minimumSpend: 800, available: true },
@@ -401,7 +401,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
-    imageUrl: "https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=800&q=80",
     tables: [
       { id: "mynt-vip", name: "VIP Booth", description: "Intimate booth in the main room", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1200, available: true },
       { id: "mynt-premium", name: "Premium Table", description: "Best sightlines in the house — center of the action", location: "Center Floor", capacity: { min: 4, max: 8 }, minimumSpend: 2000, available: true },
