@@ -362,12 +362,12 @@ function AssistantBubble({
           style={{ background: "linear-gradient(135deg, #0e0e0e, #090909)" }}
         >
           {content ? (
-            <p className="font-sans text-sm text-nocte-cream leading-relaxed">
-              {content}
+            <div className="font-sans text-sm text-nocte-cream leading-relaxed">
+              <FormattedText text={content} />
               {isStreaming && (
                 <span className="inline-block w-0.5 h-3.5 bg-nocte-gold ml-0.5 animate-pulse align-middle" />
               )}
-            </p>
+            </div>
           ) : (
             <span className="flex gap-1 items-center h-5">
               <span className="w-1.5 h-1.5 rounded-full bg-nocte-muted/60 animate-bounce [animation-delay:0ms]" />
@@ -470,5 +470,22 @@ function UserBubble({ content }: { content: string }) {
         </p>
       </div>
     </div>
+  );
+}
+
+function FormattedText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i} className="font-semibold text-nocte-gold">{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith("*") && part.endsWith("*")) {
+          return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
   );
 }
