@@ -1,20 +1,12 @@
 import Link from "next/link";
 import { getActiveVenues, getHotVenues } from "@/lib/venues";
 
-const SERVICES = [
-  { id: "dining", name: "Dining", icon: "🍽", href: "/concierge?message=I%20need%20a%20reservation%20at%20a%20top%20Miami%20restaurant" },
-  { id: "vip", name: "VIP Tables", icon: "✦", href: "/concierge?message=I%20want%20VIP%20tables%20and%20bottle%20service%20tonight" },
-  { id: "guestlist", name: "Guest Lists", icon: "📋", href: "/concierge?message=Can%20you%20get%20me%20on%20the%20guest%20list%20tonight" },
-  { id: "group", name: "Group Plans", icon: "👥", href: "/concierge?message=I%27m%20planning%20a%20group%20night%20out%20in%20Miami" },
-];
-
 export default async function HomePage() {
   const [allVenues, hotVenues] = await Promise.all([
     getActiveVenues(),
     getHotVenues(),
   ]);
 
-  const featuredVenue = hotVenues[0] || allVenues[0];
   const trendingVenues = hotVenues.slice(0, 4);
 
   const NEIGHBORHOODS = [
@@ -30,65 +22,54 @@ export default async function HomePage() {
       className="min-h-screen bg-nocte-black text-nocte-cream"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 64px)" }}
     >
-      {/* Hero — full bleed image */}
-      <section className="relative overflow-hidden" style={{ height: "85vh", minHeight: "600px" }}>
-        {featuredVenue?.imageUrl && (
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${featuredVenue.imageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-nocte-black via-black/60 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-
-        <div className="relative h-full flex flex-col justify-between px-6 pt-20 pb-8">
-          {/* Top — Logo */}
-          <div>
-            <h1
-              className="font-display font-light text-nocte-cream tracking-[0.3em] leading-none"
-              style={{ fontSize: "clamp(3rem, 14vw, 5rem)" }}
-            >
-              NOCT&#274;
-            </h1>
-            <p className="font-sans text-[10px] text-nocte-gold/80 tracking-[0.3em] uppercase mt-2">
-              Miami&apos;s Luxury Concierge
-            </p>
-          </div>
-
-          {/* Bottom — CTA */}
-          <div>
-            <p className="font-display text-2xl font-light text-nocte-cream tracking-wide leading-snug mb-6 max-w-[300px]">
-              Your night, handled.
-            </p>
-            <Link
-              href="/concierge"
-              className="inline-flex items-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-8 py-4 hover:bg-nocte-gold-light transition-all duration-300"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-              </svg>
-              Talk to the Concierge
-            </Link>
-            <p className="font-sans text-[10px] text-nocte-muted/60 mt-3 tracking-wide">
-              Tables, guest lists, restaurants — one conversation.
-            </p>
-          </div>
-        </div>
+      {/* Hero — typographic, no image */}
+      <section className="px-6 pt-24 pb-16 border-b border-nocte-border">
+        <p className="font-sans text-[10px] text-nocte-gold tracking-[0.4em] uppercase mb-6">
+          Miami Concierge
+        </p>
+        <h1
+          className="font-display font-light text-nocte-cream tracking-[0.2em] leading-[0.9] mb-6"
+          style={{ fontSize: "clamp(3.5rem, 16vw, 6rem)" }}
+        >
+          NOCT&#274;
+        </h1>
+        <p className="font-sans text-base text-nocte-muted leading-relaxed max-w-[340px] mb-10">
+          Reservations, tables, and guest lists at Miami&apos;s best venues — handled through one conversation.
+        </p>
+        <Link
+          href="/concierge"
+          className="inline-flex items-center gap-3 bg-nocte-gold text-nocte-black font-sans text-[11px] tracking-[0.25em] uppercase px-8 py-4 hover:bg-nocte-gold-light transition-all duration-300"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+          </svg>
+          Talk to the Concierge
+        </Link>
       </section>
 
-      {/* Services — horizontal scroll */}
-      <section className="py-8 border-b border-nocte-border">
-        <div className="flex gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-          {SERVICES.map((s) => (
-            <Link key={s.id} href={s.href} className="flex-shrink-0 flex flex-col items-center gap-2 px-6 py-2 group">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-200">{s.icon}</span>
-              <span className="font-sans text-[9px] text-nocte-muted tracking-[0.15em] uppercase group-hover:text-nocte-cream transition-colors">{s.name}</span>
-            </Link>
-          ))}
+      {/* Services — minimal text links */}
+      <section className="px-6 py-8 border-b border-nocte-border">
+        <div className="grid grid-cols-2 gap-4">
+          <ServiceCard
+            title="Dinner Reservations"
+            subtitle="Hard-to-get tables"
+            href="/concierge?message=I%20need%20a%20reservation%20at%20a%20top%20Miami%20restaurant"
+          />
+          <ServiceCard
+            title="VIP Tables"
+            subtitle="Bottle service & booths"
+            href="/concierge?message=I%20want%20VIP%20tables%20and%20bottle%20service%20tonight"
+          />
+          <ServiceCard
+            title="Guest Lists"
+            subtitle="Skip the line"
+            href="/concierge?message=Can%20you%20get%20me%20on%20the%20guest%20list%20tonight"
+          />
+          <ServiceCard
+            title="Group Nights"
+            subtitle="We plan everything"
+            href="/concierge?message=I%27m%20planning%20a%20group%20night%20out%20in%20Miami"
+          />
         </div>
       </section>
 
@@ -117,7 +98,7 @@ export default async function HomePage() {
                 className="relative overflow-hidden group cursor-pointer"
                 style={{
                   background: venue.gradient || "linear-gradient(160deg, #0e0e0e 0%, #050505 100%)",
-                  height: "240px",
+                  height: "220px",
                 }}
               >
                 {venue.imageUrl && (
@@ -139,7 +120,7 @@ export default async function HomePage() {
                   <div>
                     <h3
                       className="font-display font-light text-nocte-cream tracking-[0.15em] mb-0.5 leading-none"
-                      style={{ fontSize: "clamp(1.2rem, 5vw, 1.4rem)" }}
+                      style={{ fontSize: "clamp(1.1rem, 5vw, 1.3rem)" }}
                     >
                       {venue.name}
                     </h3>
@@ -187,8 +168,8 @@ export default async function HomePage() {
       {/* Bottom CTA */}
       <section className="px-6 pb-10">
         <div
-          className="relative overflow-hidden border border-nocte-border p-8 text-center"
-          style={{ background: "linear-gradient(160deg, #1a0b2e 0%, #0d0614 45%, #050505 100%)" }}
+          className="border border-nocte-border p-8 text-center"
+          style={{ background: "linear-gradient(160deg, #0e0e0e 0%, #080808 100%)" }}
         >
           <p className="font-sans text-[10px] text-nocte-gold tracking-[0.3em] uppercase mb-3">
             Your Night Starts Here
@@ -197,7 +178,7 @@ export default async function HomePage() {
             Ask the Concierge
           </h2>
           <p className="font-sans text-xs text-nocte-muted leading-relaxed mb-6 max-w-[280px] mx-auto">
-            Tables, guest lists, restaurants, yachts — whatever you need, one conversation away.
+            Tell us what you&apos;re looking for. We&apos;ll handle the rest.
           </p>
           <Link
             href="/concierge"
@@ -211,5 +192,20 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function ServiceCard({ title, subtitle, href }: { title: string; subtitle: string; href: string }) {
+  return (
+    <Link href={href}>
+      <div className="border border-nocte-border p-5 hover:border-nocte-gold/30 transition-all duration-300 bg-nocte-surface group">
+        <h3 className="font-display text-base font-light text-nocte-cream tracking-[0.05em] mb-1 group-hover:text-nocte-gold transition-colors">
+          {title}
+        </h3>
+        <p className="font-sans text-[10px] text-nocte-muted tracking-wide">
+          {subtitle}
+        </p>
+      </div>
+    </Link>
   );
 }
