@@ -46,15 +46,6 @@ export default async function VenueDetailPage({
         )}
         {/* Dark gradient overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-nocte-black via-black/60 to-black/20" />
-        {/* Grid texture */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(201,168,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
 
         {/* Back button */}
         <Link
