@@ -17,11 +17,10 @@ export default async function HomePage() {
     >
       {/* Hero — concierge-first */}
       <section className="px-6 pt-20 pb-10 border-b border-nocte-border">
-        <div className="flex items-center gap-2 mb-8">
+        <div className="mb-8">
           <h1 className="font-display text-2xl font-light text-nocte-cream tracking-[0.2em]">
             NOCT&#274;
           </h1>
-          <span className="font-sans text-[9px] text-nocte-muted tracking-[0.2em] uppercase mt-1">Miami</span>
         </div>
 
         <p className="font-display text-3xl font-light text-nocte-cream leading-snug tracking-wide mb-8 max-w-[360px]">
@@ -33,7 +32,6 @@ export default async function HomePage() {
         {/* Quick picks */}
         <div className="flex gap-2 mt-5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
           {[
-            { label: "Tonight", message: "What's the best spot to go out tonight?" },
             { label: "Dinner for two", message: "I need a dinner reservation for two tonight" },
             { label: "Group night out", message: "Planning a group night out this weekend, 8 people" },
             { label: "VIP tables", message: "I want a VIP table with bottle service tonight" },
