@@ -1,20 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import VenueCardSkeleton from "@/app/_components/VenueCardSkeleton";
 import type { Venue } from "@/lib/venues";
 
-const TYPE_FILTERS = ["All", "Nightclub", "Lounge", "Restaurant & Bar", "Ultra Lounge", "Omakase", "Steakhouse", "Bar"];
-const VIBE_FILTERS = ["All", "Wild", "Electric", "Upscale", "Intimate", "Chill", "Trendy", "Celebrity", "24-Hour"];
-const PRICE_FILTERS = ["All", "$", "$$", "$$$", "$$$$"];
-const NEIGHBORHOOD_FILTERS = ["All", "South Beach", "Brickell", "Wynwood", "Design District", "Downtown"];
+const TYPE_OPTIONS = ["All", "Nightclub", "Lounge", "Restaurant & Bar", "Ultra Lounge", "Omakase", "Steakhouse", "Bar"];
+const VIBE_OPTIONS = ["All", "Wild", "Electric", "Upscale", "Intimate", "Chill", "Trendy", "Celebrity", "24-Hour"];
+const PRICE_OPTIONS = ["All", "$", "$$", "$$$", "$$$$"];
+const NEIGHBORHOOD_OPTIONS = ["All", "South Beach", "Brickell", "Wynwood", "Design District", "Downtown", "Miami River"];
 
 const SKELETON_COUNT = 6;
 
 export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState("All");
   const [activeVibe, setActiveVibe] = useState("All");
   const [activePrice, setActivePrice] = useState("All");
@@ -32,14 +33,27 @@ export default function DiscoverPage() {
       });
   }, []);
 
+  const hasFilters = activeType !== "All" || activeVibe !== "All" || activePrice !== "All" || activeNeighborhood !== "All" || search.length > 0;
 
-  const filtered = venues.filter((v) => {
-    if (activeType !== "All" && v.type !== activeType) return false;
-    if (activeVibe !== "All" && !v.vibe.includes(activeVibe)) return false;
-    if (activePrice !== "All" && v.priceRange !== activePrice) return false;
-    if (activeNeighborhood !== "All" && v.neighborhood !== activeNeighborhood) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return venues.filter((v) => {
+      if (q && !v.name.toLowerCase().includes(q) && !v.neighborhood.toLowerCase().includes(q) && !v.type.toLowerCase().includes(q)) return false;
+      if (activeType !== "All" && v.type !== activeType) return false;
+      if (activeVibe !== "All" && !v.vibe.includes(activeVibe)) return false;
+      if (activePrice !== "All" && v.priceRange !== activePrice) return false;
+      if (activeNeighborhood !== "All" && v.neighborhood !== activeNeighborhood) return false;
+      return true;
+    });
+  }, [venues, search, activeType, activeVibe, activePrice, activeNeighborhood]);
+
+  function clearAll() {
+    setSearch("");
+    setActiveType("All");
+    setActiveVibe("All");
+    setActivePrice("All");
+    setActiveNeighborhood("All");
+  }
 
   return (
     <div
@@ -57,44 +71,35 @@ export default function DiscoverPage() {
       </div>
 
       {/* Search bar */}
-      <div className="px-6 pt-6 pb-4">
-        <div className="border border-nocte-border flex items-center gap-3 px-4 py-3.5">
+      <div className="px-6 pt-5 pb-4">
+        <div className="border border-nocte-border flex items-center gap-3 px-4 py-3">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-nocte-muted flex-shrink-0">
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
             <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <span className="font-sans text-sm text-nocte-muted tracking-wide">
-            Search venues, neighborhoods…
-          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search venues, neighborhoods…"
+            className="flex-1 bg-transparent font-sans text-sm text-nocte-cream placeholder:text-nocte-muted/50 focus:outline-none"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-nocte-muted hover:text-nocte-cream transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Filter rows */}
-      <div className="flex flex-col gap-2 pb-5">
-        <FilterRow
-          label="Type"
-          items={TYPE_FILTERS}
-          active={activeType}
-          onChange={setActiveType}
-        />
-        <FilterRow
-          label="Vibe"
-          items={VIBE_FILTERS}
-          active={activeVibe}
-          onChange={setActiveVibe}
-        />
-        <FilterRow
-          label="Price"
-          items={PRICE_FILTERS}
-          active={activePrice}
-          onChange={setActivePrice}
-        />
-        <FilterRow
-          label="Area"
-          items={NEIGHBORHOOD_FILTERS}
-          active={activeNeighborhood}
-          onChange={setActiveNeighborhood}
-        />
+      {/* Filters — compact dropdowns */}
+      <div className="px-6 pb-4 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+        <FilterDropdown label="Type" value={activeType} options={TYPE_OPTIONS} onChange={setActiveType} />
+        <FilterDropdown label="Vibe" value={activeVibe} options={VIBE_OPTIONS} onChange={setActiveVibe} />
+        <FilterDropdown label="Price" value={activePrice} options={PRICE_OPTIONS} onChange={setActivePrice} />
+        <FilterDropdown label="Area" value={activeNeighborhood} options={NEIGHBORHOOD_OPTIONS} onChange={setActiveNeighborhood} />
       </div>
 
       {/* Results count */}
@@ -103,14 +108,9 @@ export default function DiscoverPage() {
           <p className="font-sans text-[10px] text-nocte-muted tracking-[0.2em] uppercase">
             {filtered.length} venue{filtered.length !== 1 ? "s" : ""}
           </p>
-          {(activeType !== "All" || activeVibe !== "All" || activePrice !== "All" || activeNeighborhood !== "All") && (
+          {hasFilters && (
             <button
-              onClick={() => {
-                setActiveType("All");
-                setActiveVibe("All");
-                setActivePrice("All");
-                setActiveNeighborhood("All");
-              }}
+              onClick={clearAll}
               className="font-sans text-[10px] tracking-[0.2em] uppercase text-nocte-gold"
             >
               Clear filters
@@ -119,7 +119,7 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* Venue grid — skeleton or real cards */}
+      {/* Venue grid */}
       {loading ? (
         <div className="grid grid-cols-2 gap-px mx-6">
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
@@ -146,7 +146,6 @@ export default function DiscoverPage() {
                   height: "280px",
                 }}
               >
-                {/* Venue image */}
                 {venue.imageUrl && (
                   <div
                     className="absolute inset-0"
@@ -157,9 +156,7 @@ export default function DiscoverPage() {
                     }}
                   />
                 )}
-                {/* Dark gradient overlay for readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
-                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-nocte-gold/0 group-hover:bg-nocte-gold/5 transition-colors duration-300" />
 
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
@@ -200,40 +197,39 @@ export default function DiscoverPage() {
   );
 }
 
-function FilterRow({
-  label,
-  items,
-  active,
-  onChange,
-}: {
+function FilterDropdown({ label, value, options, onChange }: {
   label: string;
-  items: string[];
-  active: string;
+  value: string;
+  options: string[];
   onChange: (val: string) => void;
 }) {
+  const isActive = value !== "All";
   return (
-    <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-      <span className="flex-shrink-0 font-sans text-[9px] text-nocte-muted tracking-[0.2em] uppercase pl-6 pr-3">
-        {label}
-      </span>
-      <div className="flex gap-2 overflow-x-auto pr-6" style={{ scrollbarWidth: "none" }}>
-        {items.map((item) => {
-          const isActive = active === item;
-          return (
-            <button
-              key={item}
-              onClick={() => onChange(item)}
-              className={`flex-shrink-0 font-sans text-[10px] tracking-[0.15em] uppercase border px-3 py-2 transition-all duration-200 ${
-                isActive
-                  ? "border-nocte-gold text-nocte-gold"
-                  : "border-nocte-border text-nocte-muted hover:border-nocte-gold/40 hover:text-nocte-cream"
-              }`}
-            >
-              {item}
-            </button>
-          );
-        })}
-      </div>
+    <div className="relative flex-shrink-0">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`appearance-none font-sans text-[10px] tracking-[0.15em] uppercase border pl-3 pr-7 py-2 bg-transparent cursor-pointer focus:outline-none transition-all duration-200 ${
+          isActive
+            ? "border-nocte-gold text-nocte-gold"
+            : "border-nocte-border text-nocte-muted hover:border-nocte-gold/40"
+        }`}
+      >
+        {options.map((o) => (
+          <option key={o} value={o} className="bg-nocte-black text-nocte-cream">
+            {o === "All" ? label : o}
+          </option>
+        ))}
+      </select>
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+        fill="none"
+        className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${isActive ? "text-nocte-gold" : "text-nocte-muted"}`}
+      >
+        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </div>
   );
 }
