@@ -31,8 +31,21 @@ export default async function VenueDetailPage({
       {/* Hero */}
       <div
         className="relative overflow-hidden"
-        style={{ background: venue.gradient, aspectRatio: "4/5" }}
+        style={{ background: venue.gradient || "linear-gradient(160deg, #0e0e0e 0%, #050505 100%)", aspectRatio: "4/5" }}
       >
+        {/* Venue image */}
+        {venue.imageUrl && (
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${venue.imageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
+        {/* Dark gradient overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-nocte-black via-black/60 to-black/20" />
         {/* Grid texture */}
         <div
           className="absolute inset-0 opacity-[0.04]"
@@ -42,8 +55,6 @@ export default async function VenueDetailPage({
             backgroundSize: "48px 48px",
           }}
         />
-        {/* Bottom vignette */}
-        <div className="absolute bottom-0 left-0 right-0 h-3/4 bg-gradient-to-t from-nocte-black to-transparent" />
 
         {/* Back button */}
         <Link

@@ -1,0 +1,16 @@
+update venues set image_url = 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&q=80' where id = 'liv';
+update venues set image_url = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80' where id = 'e11even';
+update venues set image_url = 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80' where id = 'club-space';
+update venues set image_url = 'https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=800&q=80' where id = 'komodo';
+update venues set image_url = 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80' where id = 'gekko';
+update venues set image_url = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80' where id = 'swan';
+update venues set image_url = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80' where id = 'sugar';
+update venues set image_url = 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80' where id = 'juvia';
+update venues set image_url = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80' where id = 'kiki-on-the-river';
+update venues set image_url = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80' where id = 'nikki-beach';
+update venues set image_url = 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&q=80' where id = 'the-broken-shaker';
+update venues set image_url = 'https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=800&q=80' where id = 'mynt-lounge';
+update venues set image_url = 'https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=800&q=80' where id = 'zuma';
+update venues set image_url = 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=800&q=80' where id = 'naoe';
+update venues set image_url = 'https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80' where id = 'papi-steak';
+update venues set image_url = 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=800&q=80' where id = 'floyd';

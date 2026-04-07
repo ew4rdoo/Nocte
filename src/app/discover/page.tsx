@@ -142,10 +142,23 @@ export default function DiscoverPage() {
               <div
                 className="relative overflow-hidden group cursor-pointer"
                 style={{
-                  background: venue.gradient,
-                  aspectRatio: "3/4",
+                  background: venue.gradient || "linear-gradient(160deg, #0e0e0e 0%, #050505 100%)",
+                  height: "280px",
                 }}
               >
+                {/* Venue image */}
+                {venue.imageUrl && (
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `url(${venue.imageUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                )}
+                {/* Dark gradient overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
                 {/* Grid texture */}
                 <div
                   className="absolute inset-0 opacity-[0.04]"
@@ -157,8 +170,6 @@ export default function DiscoverPage() {
                 />
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-nocte-gold/0 group-hover:bg-nocte-gold/5 transition-colors duration-300" />
-                {/* Bottom vignette */}
-                <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/70 to-transparent" />
 
                 <div className="absolute inset-0 flex flex-col justify-between p-4">
                   <div className="flex items-start justify-between">

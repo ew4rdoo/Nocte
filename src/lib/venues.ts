@@ -31,6 +31,7 @@ export type Venue = {
   reviews: { author: string; text: string; rating: number }[];
   hot?: boolean;
   tables?: TableOption[];
+  imageUrl?: string;
 };
 
 const VENUES_FALLBACK: Venue[] = [
@@ -73,6 +74,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: true,
+    imageUrl: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&q=80",
     tables: [
       { id: "liv-vip-main", name: "VIP Table", description: "Main floor VIP with direct DJ view", location: "Main Floor", capacity: { min: 4, max: 8 }, minimumSpend: 2500, available: true },
       { id: "liv-vip-mezzanine", name: "Mezzanine VIP", description: "Elevated mezzanine overlooking the dance floor", location: "Mezzanine", capacity: { min: 4, max: 10 }, minimumSpend: 3500, available: true },
@@ -114,6 +116,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: true,
+    imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
     tables: [
       { id: "e11-main-vip", name: "Main Room VIP", description: "Ground level with stage views and full bottle service", location: "Main Room", capacity: { min: 4, max: 8 }, minimumSpend: 1500, available: true },
       { id: "e11-skybox", name: "Skybox", description: "Second-floor private booth overlooking the stage", location: "Upper Level", capacity: { min: 4, max: 6 }, minimumSpend: 2500, available: true },
@@ -142,6 +145,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "4–8 guests",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80",
     tables: [
       { id: "cs-terrace", name: "Terrace Table", description: "The legendary terrace — sunrise sessions happen here", location: "Terrace", capacity: { min: 4, max: 8 }, minimumSpend: 1000, available: true },
       { id: "cs-main", name: "Main Room Table", description: "Inside the main room near the booth", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1500, available: true },
@@ -180,6 +184,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
+    imageUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=800&q=80",
     tables: [
       { id: "komodo-dining", name: "Dining Table", description: "Main dining room with views of the open kitchen", location: "Dining Room", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
       { id: "komodo-rooftop", name: "Rooftop Table", description: "Third-floor open-air rooftop — the scene on weekends", location: "Rooftop", capacity: { min: 4, max: 8 }, minimumSpend: 800, available: true },
@@ -207,6 +212,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
   },
   {
     id: "swan",
@@ -240,6 +246,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: true,
+    imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
     tables: [
       { id: "swan-indoor", name: "Indoor Table", description: "Main dining room surrounded by Pharrell's art curation", location: "Dining Room", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
       { id: "swan-patio", name: "Patio Table", description: "Outdoor patio in the Design District courtyard", location: "Patio", capacity: { min: 2, max: 8 }, minimumSpend: 500, available: true },
@@ -267,6 +274,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80",
   },
   {
     id: "juvia",
@@ -288,6 +296,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80",
   },
   {
     id: "kiki-on-the-river",
@@ -310,6 +319,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
   },
   {
     id: "nikki-beach",
@@ -333,6 +343,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
   },
   {
     id: "the-broken-shaker",
@@ -355,6 +366,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&q=80",
   },
   {
     id: "mynt-lounge",
@@ -389,6 +401,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
+    imageUrl: "https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=800&q=80",
     tables: [
       { id: "mynt-vip", name: "VIP Booth", description: "Intimate booth in the main room", location: "Main Room", capacity: { min: 4, max: 6 }, minimumSpend: 1200, available: true },
       { id: "mynt-premium", name: "Premium Table", description: "Best sightlines in the house — center of the action", location: "Center Floor", capacity: { min: 4, max: 8 }, minimumSpend: 2000, available: true },
@@ -414,6 +427,7 @@ const VENUES_FALLBACK: Venue[] = [
     tableCapacity: "",
     phone: "",
     reviews: [],
+    imageUrl: "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=800&q=80",
   },
   {
     id: "naoe",
@@ -448,6 +462,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
+    imageUrl: "https://images.unsplash.com/photo-1553621042-f6e147245754?w=800&q=80",
     tables: [
       { id: "naoe-counter", name: "Omakase Counter", description: "8-seat counter — the full experience", location: "Counter", capacity: { min: 1, max: 2 }, minimumSpend: 0, available: true },
       { id: "naoe-private", name: "Private Room", description: "Intimate private dining for special occasions", location: "Private Room", capacity: { min: 4, max: 8 }, minimumSpend: 0, available: true },
@@ -483,6 +498,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: true,
+    imageUrl: "https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80",
     tables: [
       { id: "papi-dining", name: "Dining Table", description: "Main room table — theatrical wagyu presentations", location: "Main Dining", capacity: { min: 2, max: 6 }, minimumSpend: 0, available: true },
       { id: "papi-vip", name: "VIP Booth", description: "Private booth with dedicated sommelier service", location: "VIP Section", capacity: { min: 4, max: 10 }, minimumSpend: 1000, available: true },
@@ -519,6 +535,7 @@ const VENUES_FALLBACK: Venue[] = [
       },
     ],
     hot: false,
+    imageUrl: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=800&q=80",
   },
 ];
 
@@ -599,6 +616,7 @@ type VenueRow = {
   hot: boolean;
   active: boolean;
   submission_id: string | null;
+  image_url: string | null;
 };
 
 type TableRow = {
@@ -657,6 +675,7 @@ function rowToVenue(row: VenueRow, tableRows: TableRow[]): Venue {
     phone: row.phone,
     reviews: parseJsonField<{ author: string; text: string; rating: number }[]>(row.reviews, []),
     hot: row.hot,
+    imageUrl: row.image_url || undefined,
     tables: tableRows
       .filter((t) => t.venue_id === row.id)
       .sort((a, b) => a.sort_order - b.sort_order)
@@ -866,6 +885,7 @@ export async function createVenue(
       hot: data.hot || false,
       active: true,
       submission_id: null,
+      image_url: data.imageUrl || null,
     });
     if (error) throw new Error(`Failed to create venue: ${error.message}`);
 
@@ -914,6 +934,7 @@ export async function updateVenue(
     reviews: { author: string; text: string; rating: number }[];
     hot: boolean;
     active: boolean;
+    imageUrl: string;
   }>
 ): Promise<Venue | null> {
   if (!hasSupabase()) return null;
@@ -942,6 +963,7 @@ export async function updateVenue(
   if (updates.reviews !== undefined) dbUpdates.reviews = JSON.stringify(updates.reviews);
   if (updates.hot !== undefined) dbUpdates.hot = updates.hot;
   if (updates.active !== undefined) dbUpdates.active = updates.active;
+  if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
 
   dbUpdates.updated_at = new Date().toISOString();
 
